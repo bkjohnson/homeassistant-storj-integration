@@ -1,0 +1,56 @@
+# serializer version: 1
+# name: test_form
+  list([
+    tuple(
+      'uplink',
+      'access',
+      'import',
+      'ha2',
+      'abc123xyz',
+    ),
+    tuple(
+      'uplink',
+      'access',
+      'inspect',
+      'ha2',
+    ),
+  ])
+# ---
+# name: test_form.1
+  tuple(
+    'my.storj-satellite.io',
+  )
+# ---
+# name: test_form_cannot_connect
+  list([
+    tuple(
+      'uplink',
+      'access',
+      'import',
+      'ha2',
+      'abc123xyz',
+    ),
+    tuple(
+      'uplink',
+      'access',
+      'inspect',
+      'ha2',
+    ),
+  ])
+# ---
+# name: test_form_cannot_connect.1
+  tuple(
+    'my.storj-satellite.io',
+  )
+# ---
+# name: test_form_invalid_auth
+  list([
+    tuple(
+      'uplink',
+      'access',
+      'import',
+      'ha2',
+      'abc123xyz',
+    ),
+  ])
+# ---

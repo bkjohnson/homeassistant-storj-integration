@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import json
+from icmplib import async_ping
 
 from homeassistant.components.backup import AgentBackup, suggested_filename
 from homeassistant.exceptions import HomeAssistantError
@@ -25,7 +26,6 @@ class StorjClient:
         """Initialize."""
         self._ha_instance_id = ha_instance_id
         self.bucket_name = bucket_name
-        # self.satellite = satellite
 
     async def authenticate(self, access_grant: str) -> bool:
         """Test if we can authenticate with the host."""
@@ -33,7 +33,29 @@ class StorjClient:
             "uplink", "access", "import", "ha2", access_grant
         )
         await result.communicate()
+
         return result.returncode == 0
+
+    async def satelitte_is_live(self) -> bool:
+        """Check to see if the satellite contained in the access grant is reachable."""
+
+        result = await asyncio.create_subprocess_exec(
+            "uplink",
+            "access",
+            "inspect",
+            "ha2",
+            stdout=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await result.communicate()
+        json_access = json.loads(stdout.decode())
+        url = json_access["satellite_addr"].split("@")[-1]
+        # We don't want the port
+        host = url.split(":")[0]
+
+        _LOGGER.debug("Checking to see if Storj satellite %s can be reached", host)
+        host = await async_ping(host, privileged=False)
+
+        return host.is_alive
 
     async def async_upload_backup(
         self,
