@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Python modules
         run: |
-          pip install --constraint=.github/workflows/constraints.txt pre-commit black flake8 mypy
+          pip install --constraint=.github/workflows/constraints.txt pre-commit black flake8 mypy homeassistant
 
       - name: Run pre-commit on all files
         run: |
