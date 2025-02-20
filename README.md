@@ -14,9 +14,11 @@
 [![Discord][discord-shield]][discord]
 [![Community Forum][forum-shield]][forum]
 
+This integration allows you to connect your [Storj][storj] account with Home Assistant Backups. When you set up this integration, you will have a new folder called `backups` in the given bucket where all the backups will be stored.
+
 ## Prerequisites
 
-You need to have a [Storj][storj] account along with an [Access Grant that you created][access-grant]. The [`uplink` CLI tool][uplink] will also need to be installed on your Home Assistant instance.
+You need to have a Storj account along with an [Access Grant that you created][access-grant]. The [`uplink` CLI tool][uplink] will also need to be installed on your Home Assistant instance.
 
 ## Installation
 
