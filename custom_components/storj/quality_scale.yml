@@ -14,7 +14,7 @@ rules:
   docs-actions:
     status: exempt
     comment: No actions.
-  docs-high-level-description: todo
+  docs-high-level-description: done
   docs-installation-instructions: todo
   docs-removal-instructions: todo
   entity-event-setup:
