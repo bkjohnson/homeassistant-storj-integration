@@ -16,6 +16,8 @@
 
 ## Installation
 
+You only need one of these installation options.
+
 ### Manually
 
 If you've cloned the repo, you can symlink to it.
