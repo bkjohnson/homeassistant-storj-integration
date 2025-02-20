@@ -14,6 +14,10 @@
 [![Discord][discord-shield]][discord]
 [![Community Forum][forum-shield]][forum]
 
+## Prerequisites
+
+You need to have a [Storj][storj] account along with an [Access Grant that you created][access-grant]. The [`uplink` CLI tool][uplink] will also need to be installed on your Home Assistant instance.
+
 ## Installation
 
 You only need one of these installation options.
@@ -64,6 +68,7 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 
 ---
 
+[access-grant]: https://storj.dev/dcs/access#create-access-grant
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint
 [black]: https://github.com/psf/black
 [black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
@@ -83,4 +88,6 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/bkjohnson/homeassistant-storj-integration.svg?style=for-the-badge
 [releases]: https://github.com/bkjohnson/homeassistant-storj-integration/releases
+[storj]: https://www.storj.io
+[uplink]: https://storj.dev/dcs/api/uplink-cli/installation
 [user_profile]: https://github.com/bkjohnson
