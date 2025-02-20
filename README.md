@@ -14,46 +14,49 @@
 [![Discord][discord-shield]][discord]
 [![Community Forum][forum-shield]][forum]
 
-## Setup
+This integration allows you to connect your [Storj][storj] account with Home Assistant Backups. When you set up this integration, you will have a new folder called `backups` in the given bucket where all the backups will be stored.
+
+## Prerequisites
+
+You need to have a Storj account along with an [Access Grant that you created][access-grant]. The [`uplink` CLI tool][uplink] will also need to be installed on your Home Assistant instance.
+
+## Installation
+
+You only need one of these installation options.
+
+### Manually
+
+If you've cloned the repo, you can symlink to it.
+
+```
+cd <home_assistant_config_directory>/custom_components/
+ln -s path/to/cloned/repo storj
+```
+
+Alternatively, place the `storj` directory into:
+
+```yaml
+<home_assistant_config_directory>/custom_components/
+```
+
+Next, search for "Storj" from the integrations page and proceed with the configuration.
+
+[![Open your integrations dashboard on your Home Assistant instance](https://my.home-assistant.io/badges/integrations.svg)](https://my.home-assistant.io/redirect/integrations/)
+
+### Via [HACS](https://hacs.xyz/)
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=bkjohnson&repository=homeassistant-storj-integration&category=integration)
+
+## Configuration is done in the UI
+
+<!---->
+
+## Development Setup
 
 1. Install dependencies
    ```
    pip install -r requirements_dev.txt
    ```
-
-## Installation
-
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `storj`.
-4. Download _all_ the files from the `custom_components/storj/` directory (folder) in this repository.
-5. Place the files you downloaded in the new directory (folder) you created.
-6. Restart Home Assistant
-7. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Storj"
-
-Using your HA configuration directory (folder) as a starting point you should now also have this:
-
-```text
-custom_components/storj/translations/en.json
-custom_components/storj/translations/fr.json
-custom_components/storj/translations/nb.json
-custom_components/storj/translations/sensor.en.json
-custom_components/storj/translations/sensor.fr.json
-custom_components/storj/translations/sensor.nb.json
-custom_components/storj/translations/sensor.nb.json
-custom_components/storj/__init__.py
-custom_components/storj/api.py
-custom_components/storj/binary_sensor.py
-custom_components/storj/config_flow.py
-custom_components/storj/const.py
-custom_components/storj/manifest.json
-custom_components/storj/sensor.py
-custom_components/storj/switch.py
-```
-
-## Configuration is done in the UI
-
-<!---->
 
 ## Contributions are welcome!
 
@@ -67,6 +70,7 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 
 ---
 
+[access-grant]: https://storj.dev/dcs/access#create-access-grant
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint
 [black]: https://github.com/psf/black
 [black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
@@ -86,4 +90,6 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/release/bkjohnson/homeassistant-storj-integration.svg?style=for-the-badge
 [releases]: https://github.com/bkjohnson/homeassistant-storj-integration/releases
+[storj]: https://www.storj.io
+[uplink]: https://storj.dev/dcs/api/uplink-cli/installation
 [user_profile]: https://github.com/bkjohnson

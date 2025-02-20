@@ -1,9 +1,89 @@
 # serializer version: 1
+# name: test_agents_delete
+  list([
+    tuple(
+      'uplink',
+      'ls',
+      'sj://ha-backups/backups/',
+      '--o',
+      'json',
+    ),
+    tuple(
+      'uplink',
+      'meta',
+      'get',
+      'sj://ha-backups/backups/backup.tar',
+    ),
+    tuple(
+      'uplink',
+      'rm',
+      'sj://ha-backups/backups/Test_2025-01-01_01.23_45678000.tar',
+    ),
+  ])
+# ---
+# name: test_agents_delete_fail
+  list([
+    tuple(
+      'uplink',
+      'ls',
+      'sj://ha-backups/backups/',
+      '--o',
+      'json',
+    ),
+    tuple(
+      'uplink',
+      'meta',
+      'get',
+      'sj://ha-backups/backups/backup.tar',
+    ),
+    tuple(
+      'uplink',
+      'rm',
+      'sj://ha-backups/backups/Test_2025-01-01_01.23_45678000.tar',
+    ),
+  ])
+# ---
+# name: test_agents_delete_not_found
+  list([
+    tuple(
+      'uplink',
+      'ls',
+      'sj://ha-backups/backups/',
+      '--o',
+      'json',
+    ),
+    tuple(
+      'uplink',
+      'meta',
+      'get',
+      'sj://ha-backups/backups/backup.tar',
+    ),
+  ])
+# ---
+# name: test_agents_list_backups
+  list([
+    tuple(
+      'uplink',
+      'ls',
+      'sj://ha-backups/backups/',
+      '--o',
+      'json',
+    ),
+    tuple(
+      'uplink',
+      'meta',
+      'get',
+      'sj://ha-backups/backups/backup.tar',
+    ),
+  ])
+# ---
 # name: test_agents_upload
   tuple(
     'uplink',
     'cp',
     'backups/Test_2025-01-01_01.23_45678000.tar',
-    'sj://ha-backups',
+    'sj://ha-backups/backups/',
+    '--metadata',
+    '{"addons.[0].name": "Test", "addons.[0].slug": "test", "addons.[0].version": "1.0.0", "backup_id": "test-backup", "date": "2025-01-01T01:23:45.678Z", "database_included$bool": "True", "extra_metadata.with_automatic_settings$bool": "False", "folders$emptylist": "[]", "homeassistant_included$bool": "True", "homeassistant_version": "2024.12.0", "name": "Test", "protected$bool": "False", "size$int": "987"}',
   )
 # ---

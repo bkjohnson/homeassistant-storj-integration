@@ -82,7 +82,7 @@ class StorjBackupAgent(BackupAgent):
         """List backups."""
         try:
             return await self._client.async_list_backups()
-        except (HomeAssistantError, TimeoutError) as err:
+        except (UplinkError, HomeAssistantError, TimeoutError) as err:
             raise BackupAgentError(f"Failed to list backups: {err}") from err
 
     async def async_get_backup(
@@ -119,4 +119,12 @@ class StorjBackupAgent(BackupAgent):
         :param backup_id: The ID of the backup that was returned in async_list_backups.
         """
         _LOGGER.debug("Deleting backup_id: %s", backup_id)
-        # file_id = await self._client.async_get_backup_file_id(backup_id)
+        try:
+            backup = await self.async_get_backup(backup_id)
+
+            if backup:
+                await self._client.async_delete_backup(backup)
+        except (UplinkError, HomeAssistantError, TimeoutError) as err:
+            raise BackupAgentError(
+                f"Failed to delete backup {backup_id}: {err}"
+            ) from err

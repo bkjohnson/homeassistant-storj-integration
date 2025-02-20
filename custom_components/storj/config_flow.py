@@ -9,10 +9,10 @@ import voluptuous as vol
 
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import instance_id
 
 from .api import StorjClient
+from .exceptions import InvalidAuth, CannotConnect
 from .const import CONF_ACCESS_GRANT, CONF_BUCKET_NAME, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,11 +34,8 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     if not await client.authenticate(data[CONF_ACCESS_GRANT]):
         raise InvalidAuth
-
-    # If you cannot connect:
-    # throw CannotConnect
-    # If the authentication is wrong:
-    # InvalidAuth
+    elif not await client.satelitte_is_live():
+        raise CannotConnect("Satelitte is not reachable")
 
     # Return info that you want to store in the config entry.
     return {"title": "Storj"}
@@ -64,6 +61,7 @@ class StorjConfigFlow(ConfigFlow, domain=DOMAIN):
             except Exception:
                 _LOGGER.exception("Unexpected exception")
                 errors["base"] = "unknown"
+                return self.async_abort(reason="unknown")
             else:
                 await self.async_set_unique_id(user_input[CONF_ACCESS_GRANT])
                 return self.async_create_entry(title=info["title"], data=user_input)
@@ -71,11 +69,3 @@ class StorjConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
-
-
-class CannotConnect(HomeAssistantError):
-    """Error to indicate we cannot connect."""
-
-
-class InvalidAuth(HomeAssistantError):
-    """Error to indicate there is invalid auth."""
