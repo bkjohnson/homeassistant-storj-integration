@@ -6,12 +6,12 @@ import asyncio
 import logging
 from pathlib import Path
 import json
-from icmplib import async_ping
+from icmplib import async_ping  # type: ignore
 
 from homeassistant.components.backup import AgentBackup, suggested_filename
 from homeassistant.exceptions import HomeAssistantError
 
-from json_flatten import flatten, unflatten
+from json_flatten import flatten, unflatten  # type: ignore
 
 _LOGGER = logging.getLogger(__name__)
 
