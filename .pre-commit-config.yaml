@@ -10,7 +10,6 @@ repos:
     hooks:
       - id: mypy
         name: mypy
-        # entry: script/run-in-env.sh mypy
         entry: mypy
         language: system
         require_serial: true

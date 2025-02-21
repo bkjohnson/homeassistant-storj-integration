@@ -110,8 +110,6 @@ class StorjBackupAgent(BackupAgent):
         _LOGGER.debug("Downloading backup_id: %s", backup_id)
         # try:
         #     file_id = await self._client.async_get_backup_file_id(backup_id)
-        # async with aiofiles.open("foo.tar", "rb") as f:
-        #     return ChunkAsyncStreamIterator(f)
 
     async def async_delete_backup(
         self,
