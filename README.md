@@ -55,7 +55,7 @@ Next, search for "Storj" from the integrations page and proceed with the configu
 
 1. Install dependencies
    ```
-   pip install -r requirements_dev.txt
+   pip install -r requirements.txt
    ```
 
 ## Contributions are welcome!
