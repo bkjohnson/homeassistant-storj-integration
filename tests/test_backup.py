@@ -393,3 +393,36 @@ async def test_agents_download(
         )
 
         assert snapshot(matcher=matcher) == subprocess_exec.mock_calls[0].args
+
+
+async def test_agents_download_temp_fail(
+    hass: HomeAssistant,
+    hass_client: ClientSessionGenerator,
+    caplog: pytest.LogCaptureFixture,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test failure when downloading temp file has error."""
+
+    with (
+        mock_asyncio_subprocess_run(
+            responses=iter([b""]), returncode=1
+        ) as subprocess_exec,
+        patch(
+            "custom_components.storj.backup.StorjBackupAgent.async_get_backup"
+        ) as mock_backup,
+    ):
+        mock_backup.return_value = TEST_AGENT_BACKUP
+        client = await hass_client()
+        resp = await client.get(
+            f"/api/backup/download/{TEST_AGENT_BACKUP.backup_id}?agent_id={TEST_AGENT_ID}"
+        )
+        assert resp.status == 500
+        content = await resp.content.read()
+        assert "Unable to download temp backup" in content.decode()
+
+        matcher = path_type(
+            mapping={"3": (str,)},
+            replacer=lambda data, _: data[data.find("temp") :],
+        )
+
+        assert snapshot(matcher=matcher) == subprocess_exec.mock_calls[0].args
