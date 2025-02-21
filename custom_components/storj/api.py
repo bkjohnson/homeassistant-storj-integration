@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from pathlib import Path
 import json
-from icmplib import async_ping
+from icmplib import async_ping  # type: ignore
 
 from homeassistant.components.backup import AgentBackup, suggested_filename
 from homeassistant.exceptions import HomeAssistantError
 
-from json_flatten import flatten, unflatten
+from json_flatten import flatten, unflatten  # type: ignore
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ class StorjClient:
 
     async def async_upload_backup(
         self,
-        backup_dir: str,
+        backup_path: Path,
         backup: AgentBackup,
     ) -> None:
         """Upload a backup."""
@@ -72,7 +73,7 @@ class StorjClient:
             backup_metadata,
         )
 
-        backup_location = f"{backup_dir}/{suggested_filename(backup)}"
+        backup_location = str(backup_path.joinpath(suggested_filename(backup)))
         result = await asyncio.create_subprocess_exec(
             "uplink",
             "cp",

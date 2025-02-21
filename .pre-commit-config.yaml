@@ -8,6 +8,13 @@ repos:
       - id: trailing-whitespace
   - repo: local
     hooks:
+      - id: mypy
+        name: mypy
+        entry: mypy
+        language: system
+        require_serial: true
+        types_or: [python, pyi]
+        files: ^(custom_components)/.+\.(py|pyi)$
       - id: black
         name: black
         entry: black

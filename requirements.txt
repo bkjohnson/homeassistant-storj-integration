@@ -5,6 +5,10 @@ homeassistant==2025.2.4
 black==25.1.0
 flake8==7.1.2
 pre-commit==4.1.0
+mypy==1.15.0
+
+# mypy stubs
+types-aiofiles
 
 # Runtime deps
 json_flatten==0.3.1
