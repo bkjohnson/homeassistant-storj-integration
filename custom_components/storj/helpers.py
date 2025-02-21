@@ -4,7 +4,7 @@ from typing import Self
 from aiofiles.threadpool.binary import AsyncBufferedReader
 
 
-class ChunkAsyncStreamIterator:  # pragma: no cover
+class ChunkAsyncStreamIterator:
     """Async iterator for chunked streams.
 
     Based on the same class from homeassistant but accepts a file object
