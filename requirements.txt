@@ -1,0 +1,15 @@
+pip==25.0.1
+homeassistant==2025.2.4
+
+# Linting
+black==25.1.0
+flake8==7.1.2
+pre-commit==4.1.0
+mypy==1.15.0
+
+# Runtime deps
+json_flatten==0.3.1
+icmplib==3.0.4
+
+# Testing
+pytest-homeassistant-custom-component==0.13.214
