@@ -34,7 +34,6 @@ class StorjClient:
         )
         await result.communicate()
 
-        # Testing cache
         return result.returncode == 0
 
     async def satelitte_is_live(self) -> bool:
