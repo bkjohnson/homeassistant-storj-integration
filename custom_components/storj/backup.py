@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Callable
+from collections.abc import Callable
 import logging
-import aiofiles
+
 from typing import Any
 from pathlib import Path
 
@@ -15,7 +15,6 @@ from homeassistant.exceptions import HomeAssistantError
 from . import DATA_BACKUP_AGENT_LISTENERS, StorjConfigEntry
 from .const import DOMAIN
 from .api import UplinkError
-from .helpers import ChunkAsyncStreamIterator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -103,7 +102,7 @@ class StorjBackupAgent(BackupAgent):
         self,
         backup_id: str,
         **kwargs: Any,
-    ) -> AsyncIterator[bytes]:
+    ):
         """Download a backup file.
         :param backup_id: The ID of the backup that was returned in async_list_backups.
         :return: An async iterator that yields bytes.
@@ -111,8 +110,8 @@ class StorjBackupAgent(BackupAgent):
         _LOGGER.debug("Downloading backup_id: %s", backup_id)
         # try:
         #     file_id = await self._client.async_get_backup_file_id(backup_id)
-        async with aiofiles.open("foo.tar", "rb") as f:
-            return ChunkAsyncStreamIterator(f)
+        # async with aiofiles.open("foo.tar", "rb") as f:
+        #     return ChunkAsyncStreamIterator(f)
 
     async def async_delete_backup(
         self,
