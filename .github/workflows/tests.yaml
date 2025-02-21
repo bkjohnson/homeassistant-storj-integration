@@ -20,7 +20,7 @@ jobs:
           python-version-file: ".python-version"
       - name: Install requirements
         run: |
-          pip install -r requirements_test.txt
+          pip install -r requirements_dev.txt
       - name: Tests suite
         run: |
           pytest \
