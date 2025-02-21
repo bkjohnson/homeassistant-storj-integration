@@ -11,7 +11,7 @@ repos:
       - id: mypy
         name: mypy
         # entry: script/run-in-env.sh mypy
-        entry: mypy --install-types --non-interactive
+        entry: mypy
         language: system
         require_serial: true
         types_or: [python, pyi]
