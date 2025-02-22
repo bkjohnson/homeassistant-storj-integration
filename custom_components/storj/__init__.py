@@ -10,7 +10,7 @@ from homeassistant.helpers import instance_id
 from homeassistant.util.hass_dict import HassKey
 
 from .api import StorjClient
-from .const import DOMAIN, CONF_BUCKET_NAME
+from .const import CONF_BUCKET_NAME, DOMAIN
 
 type StorjConfigEntry = ConfigEntry[StorjClient]
 

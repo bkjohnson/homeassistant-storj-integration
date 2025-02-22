@@ -1,37 +1,35 @@
 """Test the Storj BackupAgent"""
 
-from collections.abc import AsyncGenerator
-from io import StringIO
-from homeassistant.core import HomeAssistant
-
-from typing import Any
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.typing import (
     ClientSessionGenerator,
     WebSocketGenerator,
 )
-from syrupy.assertion import SnapshotAssertion
-from syrupy.matchers import path_type
-from unittest.mock import Mock, MagicMock, patch
-from homeassistant.setup import async_setup_component
+
+from collections.abc import AsyncGenerator
+from io import StringIO
+import json
+from typing import Any
+from unittest.mock import MagicMock, Mock, patch
+
+import aiofiles
 from homeassistant.components.backup import (
     DOMAIN as BACKUP_DOMAIN,
     AddonInfo,
     AgentBackup,
 )
+from homeassistant.core import HomeAssistant
+from homeassistant.setup import async_setup_component
 from json_flatten import flatten
-import json
-import aiofiles
+from syrupy.assertion import SnapshotAssertion
+from syrupy.matchers import path_type
 
-
-from custom_components.storj.backup import (
-    async_register_backup_agents_listener,
-)
-from custom_components.storj.const import DOMAIN
 from custom_components.storj import DATA_BACKUP_AGENT_LISTENERS
-from .conftest import mock_asyncio_subprocess_run, TEST_AGENT_ID
-import pytest
+from custom_components.storj.backup import async_register_backup_agents_listener
+from custom_components.storj.const import DOMAIN
 
+from .conftest import TEST_AGENT_ID, mock_asyncio_subprocess_run
 
 TEST_AGENT_BACKUP = AgentBackup(
     addons=[AddonInfo(name="Test", slug="test", version="1.0.0")],

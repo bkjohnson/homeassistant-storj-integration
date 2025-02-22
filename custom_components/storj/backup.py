@@ -4,16 +4,16 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
 import logging
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 from homeassistant.components.backup import AgentBackup, BackupAgent, BackupAgentError
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 
 from . import DATA_BACKUP_AGENT_LISTENERS, StorjConfigEntry
-from .const import DOMAIN
 from .api import UplinkError
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
