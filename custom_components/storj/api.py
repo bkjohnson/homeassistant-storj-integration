@@ -2,18 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
 import asyncio
+from collections.abc import AsyncIterator
+import json
 import logging
+from pathlib import Path
+
 import aiofiles
 from aiofiles.os import remove as aioremove
-from pathlib import Path
-import json
-from icmplib import async_ping  # type: ignore
-
 from homeassistant.components.backup import AgentBackup, suggested_filename
 from homeassistant.exceptions import HomeAssistantError
-
+from icmplib import async_ping  # type: ignore
 from json_flatten import flatten, unflatten  # type: ignore
 
 from .helpers import ChunkAsyncStreamIterator

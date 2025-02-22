@@ -2,7 +2,6 @@
 
 from typing import Self
 
-
 CHUNK_SZ = 1024
 
 
