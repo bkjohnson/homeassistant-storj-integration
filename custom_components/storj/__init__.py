@@ -22,10 +22,7 @@ DATA_BACKUP_AGENT_LISTENERS: HassKey[list[Callable[[], None]]] = HassKey(
 async def async_setup_entry(hass: HomeAssistant, entry: StorjConfigEntry) -> bool:
     """Set up storj from a config entry."""
 
-    # TODO 1. Create API instance
-    # TODO 2. Validate the API connection (and authentication)
-    # TODO 3. Store an API object for your platforms to access
-
+    # Validation happens in config_flow
     entry.runtime_data = StorjClient(
         await instance_id.async_get(hass), entry.data[CONF_BUCKET_NAME]
     )

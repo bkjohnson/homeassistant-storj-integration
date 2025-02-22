@@ -17,7 +17,6 @@ from .const import CONF_ACCESS_GRANT, CONF_BUCKET_NAME, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# TODO adjust the data schema to the data that you need
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_ACCESS_GRANT): str,
