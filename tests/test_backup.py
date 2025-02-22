@@ -427,3 +427,35 @@ async def test_agents_download_temp_fail(
         )
 
         assert snapshot(matcher=matcher) == subprocess_exec.mock_calls[0].args
+
+
+async def test_agents_download_file_not_found(
+    hass: HomeAssistant,
+    hass_client: ClientSessionGenerator,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test agent download backup raises error if not found."""
+    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
+        "utf-8"
+    )
+    responses = iter(
+        [
+            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
+            flattened_metadata,
+            b"",
+        ]
+    )
+
+    with (
+        mock_asyncio_subprocess_run(
+            responses=responses, returncode=0
+        ) as subprocess_exec,
+    ):
+        client = await hass_client()
+        resp = await client.get(
+            f"/api/backup/download/{TEST_AGENT_BACKUP.backup_id}?agent_id={TEST_AGENT_ID}"
+        )
+        assert resp.status == 500
+        content = await resp.content.read()
+        assert "Backup not found" in content.decode()
+        assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
