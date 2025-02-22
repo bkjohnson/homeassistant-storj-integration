@@ -1,12 +1,13 @@
 """Test Storj setup process."""
 
+import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry
+
 from collections.abc import Awaitable, Callable, Coroutine
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
-import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.storj.const import DOMAIN
 

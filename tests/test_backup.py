@@ -1,5 +1,12 @@
 """Test the Storj BackupAgent"""
 
+import pytest
+from pytest_homeassistant_custom_component.common import MockConfigEntry
+from pytest_homeassistant_custom_component.typing import (
+    ClientSessionGenerator,
+    WebSocketGenerator,
+)
+
 from collections.abc import AsyncGenerator
 from io import StringIO
 import json
@@ -15,12 +22,6 @@ from homeassistant.components.backup import (
 from homeassistant.core import HomeAssistant
 from homeassistant.setup import async_setup_component
 from json_flatten import flatten
-import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
-from pytest_homeassistant_custom_component.typing import (
-    ClientSessionGenerator,
-    WebSocketGenerator,
-)
 from syrupy.assertion import SnapshotAssertion
 from syrupy.matchers import path_type
 
