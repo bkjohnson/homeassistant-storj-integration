@@ -49,6 +49,8 @@ async def test_form(
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Storj"
+    assert "result" in result
+    assert result.get("result").unique_id == "abc123xyz"
     assert result["data"] == {
         CONF_ACCESS_GRANT: "abc123xyz",
         CONF_BUCKET_NAME: "my-backups",
