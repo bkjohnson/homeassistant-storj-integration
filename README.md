@@ -49,6 +49,10 @@ Next, search for "Storj" from the integrations page and proceed with the configu
 
 ## Configuration is done in the UI
 
+## Known Limitations
+
+- Downloading from the Storj location requires downloading to your Home Assistant instance first before you can download the backup using your browser.
+
 <!---->
 
 ## Development Setup
