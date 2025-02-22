@@ -6,6 +6,12 @@ on:
 jobs:
   draft_release:
     name: Release Drafter
+    permissions:
+      # write permission is required to create a github release
+      contents: write
+      # write permission is required for autolabeler
+      # otherwise, read permission is required at least
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Run release-drafter
