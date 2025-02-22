@@ -12,7 +12,7 @@ from pytest_homeassistant_custom_component.typing import (
 )
 from syrupy.assertion import SnapshotAssertion
 from syrupy.matchers import path_type
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, MagicMock, patch
 from homeassistant.setup import async_setup_component
 from homeassistant.components.backup import (
     DOMAIN as BACKUP_DOMAIN,
@@ -21,6 +21,7 @@ from homeassistant.components.backup import (
 )
 from json_flatten import flatten
 import json
+import aiofiles
 
 from custom_components.storj.const import DOMAIN
 from .conftest import mock_asyncio_subprocess_run, TEST_AGENT_ID
@@ -74,6 +75,14 @@ async def setup_backup_integration(
 
         await hass.async_block_till_done()
         yield
+
+
+@pytest.fixture(autouse=True)
+async def setup_file_mock():
+    """Mock aiofiles so our read attempts don't fail"""
+    aiofiles.threadpool.wrap.register(MagicMock)(
+        lambda *args, **kwargs: aiofiles.threadpool.AsyncBufferedIOBase(*args, **kwargs)
+    )
 
 
 async def test_agents_upload(
@@ -351,3 +360,132 @@ async def test_agents_delete_not_found(
         assert response["success"]
         assert response["result"] == {"agent_errors": {}}
         assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
+
+
+async def test_agents_download(
+    hass: HomeAssistant,
+    hass_client: ClientSessionGenerator,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test agent download backup."""
+    read_file_chunks = [
+        b"some data",
+    ]
+    file_chunks_iter = iter(read_file_chunks)
+
+    mock_file_stream = MagicMock(read=lambda *args, **kwargs: next(file_chunks_iter))
+
+    with (
+        mock_asyncio_subprocess_run(responses=iter([b""])) as subprocess_exec,
+        patch(
+            "custom_components.storj.backup.StorjBackupAgent.async_get_backup"
+        ) as mock_backup,
+        patch("aiofiles.threadpool.sync_open", return_value=mock_file_stream),
+        patch("custom_components.storj.api.aioremove"),
+    ):
+        mock_backup.return_value = TEST_AGENT_BACKUP
+        client = await hass_client()
+        resp = await client.get(
+            f"/api/backup/download/{TEST_AGENT_BACKUP.backup_id}?agent_id={TEST_AGENT_ID}"
+        )
+        assert resp.status == 200
+        assert await resp.content.read() == b"some data"
+
+        matcher = path_type(
+            mapping={"3": (str,)},
+            replacer=lambda data, _: data[data.find("temp") :],
+        )
+
+        assert snapshot(matcher=matcher) == subprocess_exec.mock_calls[0].args
+
+
+async def test_agents_download_temp_fail(
+    hass: HomeAssistant,
+    hass_client: ClientSessionGenerator,
+    caplog: pytest.LogCaptureFixture,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test failure when downloading temp file has error."""
+
+    with (
+        mock_asyncio_subprocess_run(
+            responses=iter([b""]), returncode=1
+        ) as subprocess_exec,
+        patch(
+            "custom_components.storj.backup.StorjBackupAgent.async_get_backup"
+        ) as mock_backup,
+    ):
+        mock_backup.return_value = TEST_AGENT_BACKUP
+        client = await hass_client()
+        resp = await client.get(
+            f"/api/backup/download/{TEST_AGENT_BACKUP.backup_id}?agent_id={TEST_AGENT_ID}"
+        )
+        assert resp.status == 500
+        content = await resp.content.read()
+        assert "Unable to download temp backup" in content.decode()
+
+        matcher = path_type(
+            mapping={"3": (str,)},
+            replacer=lambda data, _: data[data.find("temp") :],
+        )
+
+        assert snapshot(matcher=matcher) == subprocess_exec.mock_calls[0].args
+
+
+async def test_agents_download_file_not_found(
+    hass: HomeAssistant,
+    hass_client: ClientSessionGenerator,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test agent download backup raises error if not found."""
+    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
+        "utf-8"
+    )
+    responses = iter(
+        [
+            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
+            flattened_metadata,
+            b"",
+        ]
+    )
+
+    with (
+        mock_asyncio_subprocess_run(
+            responses=responses, returncode=0
+        ) as subprocess_exec,
+    ):
+        client = await hass_client()
+        resp = await client.get(
+            f"/api/backup/download/{TEST_AGENT_BACKUP.backup_id}?agent_id={TEST_AGENT_ID}"
+        )
+        assert resp.status == 500
+        content = await resp.content.read()
+        assert "Backup not found" in content.decode()
+        assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
+
+
+async def test_agents_download_metadata_not_found(
+    hass: HomeAssistant,
+    hass_client: ClientSessionGenerator,
+) -> None:
+    """Test agent download backup raises error if not found."""
+    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
+        "utf-8"
+    )
+    responses = iter(
+        [
+            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
+            flattened_metadata,
+        ]
+    )
+
+    with (mock_asyncio_subprocess_run(responses=responses, returncode=0),):
+        client = await hass_client()
+        backup_id = "1234"
+        assert backup_id != TEST_AGENT_BACKUP.backup_id
+
+        resp = await client.get(
+            f"/api/backup/download/{backup_id}?agent_id={TEST_AGENT_ID}"
+        )
+        assert resp.status == 404
+        assert await resp.content.read() == b""

@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 import asyncio
 import logging
+import aiofiles
+from aiofiles.os import remove as aioremove
 from pathlib import Path
 import json
 from icmplib import async_ping  # type: ignore
@@ -12,6 +15,8 @@ from homeassistant.components.backup import AgentBackup, suggested_filename
 from homeassistant.exceptions import HomeAssistantError
 
 from json_flatten import flatten, unflatten  # type: ignore
+
+from .helpers import ChunkAsyncStreamIterator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -139,9 +144,28 @@ class StorjClient:
         if result.returncode != 0:
             raise UplinkError("Unable to delete backup")
 
-    async def async_download_backup(self) -> None:
+    async def async_download_backup(
+        self, backup: AgentBackup, backup_path: Path
+    ) -> AsyncIterator[bytes]:
         """Download a backup to the local system."""
-        _LOGGER.debug("TODO")
+
+        temp_location = str(backup_path.joinpath("temp", suggested_filename(backup)))
+        result = await asyncio.create_subprocess_exec(
+            "uplink",
+            "cp",
+            f"sj://{self.bucket_name}/backups/{suggested_filename(backup)}",
+            temp_location,
+        )
+        await result.communicate()
+        if result.returncode != 0:
+            raise UplinkError("Unable to download temp backup")
+
+        file_obj = await aiofiles.open(temp_location, "rb")
+        iterator = ChunkAsyncStreamIterator(await file_obj.read())
+        await file_obj.close()
+        await aioremove(temp_location)
+
+        return iterator
 
 
 class UplinkError(HomeAssistantError):

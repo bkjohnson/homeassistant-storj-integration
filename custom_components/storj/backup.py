@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import AsyncIterator, Callable
 import logging
-
 from typing import Any
 from pathlib import Path
 
@@ -102,14 +101,24 @@ class StorjBackupAgent(BackupAgent):
         self,
         backup_id: str,
         **kwargs: Any,
-    ):
+    ) -> AsyncIterator[bytes]:
         """Download a backup file.
         :param backup_id: The ID of the backup that was returned in async_list_backups.
         :return: An async iterator that yields bytes.
         """
         _LOGGER.debug("Downloading backup_id: %s", backup_id)
-        # try:
-        #     file_id = await self._client.async_get_backup_file_id(backup_id)
+        try:
+            backup = await self.async_get_backup(backup_id)
+
+            if backup:
+                return await self._client.async_download_backup(
+                    backup, self._backup_path
+                )
+        except (UplinkError, HomeAssistantError, TimeoutError) as err:
+            raise BackupAgentError(
+                f"Failed to download backup {backup_id}: {err}"
+            ) from err
+        raise BackupAgentError("Backup not found")
 
     async def async_delete_backup(
         self,
