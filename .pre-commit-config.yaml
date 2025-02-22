@@ -8,6 +8,12 @@ repos:
       - id: trailing-whitespace
   - repo: local
     hooks:
+      - id: isort
+        name: isort
+        entry: isort
+        language: system
+        types: [python]
+        require_serial: true
       - id: mypy
         name: mypy
         entry: mypy
