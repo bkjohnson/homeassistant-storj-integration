@@ -30,6 +30,7 @@ async def test_form(
     responses = iter([b"", json.dumps(access_json).encode("utf-8")])
 
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,
         patch(
             "custom_components.storj.api.async_ping",
@@ -58,6 +59,77 @@ async def test_form(
     assert len(mock_setup_entry.mock_calls) == 1
 
 
+async def test_form_uplink_already_installed(
+    hass: HomeAssistant,
+    mock_setup_entry: AsyncMock,
+    access_json: dict[str, Any],
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test we get the form."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {}
+
+    responses = iter([b"", b"", json.dumps(access_json).encode("utf-8")])
+
+    with (
+        mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,
+        patch(
+            "custom_components.storj.api.async_ping",
+            return_value=AsyncMock(is_alive=True),
+        ),
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {
+                CONF_ACCESS_GRANT: "abc123xyz",
+                CONF_BUCKET_NAME: "my-backups",
+            },
+        )
+        await hass.async_block_till_done()
+
+        # install_uplink() exits after the `which uplink` call
+        assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
+
+
+async def test_form_uplink_needs_installation(
+    hass: HomeAssistant,
+    mock_setup_entry: AsyncMock,
+    access_json: dict[str, Any],
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test we get the form."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {}
+
+    responses = iter([b"", b"", b"", b"", json.dumps(access_json).encode("utf-8")])
+
+    with (
+        mock_asyncio_subprocess_run(
+            responses=responses, returncode=iter([1, 0, 0, 0, 0, 0])
+        ) as subprocess_exec,
+        patch(
+            "custom_components.storj.api.async_ping",
+            return_value=AsyncMock(is_alive=True),
+        ),
+    ):
+        result = await hass.config_entries.flow.async_configure(
+            result["flow_id"],
+            {
+                CONF_ACCESS_GRANT: "abc123xyz",
+                CONF_BUCKET_NAME: "my-backups",
+            },
+        )
+        await hass.async_block_till_done()
+
+        assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
+
+
 async def test_form_invalid_auth(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
@@ -71,6 +143,7 @@ async def test_form_invalid_auth(
 
     responses = iter([b"", json.dumps(access_json).encode("utf-8")])
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(
             responses=responses, returncode=1
         ) as subprocess_exec,
@@ -92,6 +165,7 @@ async def test_form_invalid_auth(
     # FlowResultType.CREATE_ENTRY or FlowResultType.ABORT so
     # we can show the config flow is able to recover from an error.
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(responses=responses, returncode=0),
         patch(
             "custom_components.storj.api.async_ping",
@@ -130,6 +204,7 @@ async def test_form_cannot_connect(
     responses = iter([b"", json.dumps(access_json).encode("utf-8")])
 
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,
         patch(
             "custom_components.storj.api.async_ping",
@@ -156,6 +231,7 @@ async def test_form_cannot_connect(
 
     responses = iter([b"", json.dumps(access_json).encode("utf-8")])
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(responses=responses),
         patch(
             "custom_components.storj.api.async_ping",
