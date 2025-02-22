@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Callable
 import logging
-import aiofiles
 from typing import Any
 from pathlib import Path
 
@@ -15,7 +14,6 @@ from homeassistant.exceptions import HomeAssistantError
 from . import DATA_BACKUP_AGENT_LISTENERS, StorjConfigEntry
 from .const import DOMAIN
 from .api import UplinkError
-from .helpers import ChunkAsyncStreamIterator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -113,11 +111,9 @@ class StorjBackupAgent(BackupAgent):
             backup = await self.async_get_backup(backup_id)
 
             if backup:
-                temp_file_location = await self._client.async_download_backup(
+                return await self._client.async_download_backup(
                     backup, self._backup_path
                 )
-                async with aiofiles.open(temp_file_location, "rb") as f:
-                    return ChunkAsyncStreamIterator(await f.read())
         except (UplinkError, HomeAssistantError, TimeoutError) as err:
             raise BackupAgentError(
                 f"Failed to download backup {backup_id}: {err}"

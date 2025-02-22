@@ -378,6 +378,7 @@ async def test_agents_download(
             "custom_components.storj.backup.StorjBackupAgent.async_get_backup"
         ) as mock_backup,
         patch("aiofiles.threadpool.sync_open", return_value=mock_file_stream),
+        patch("custom_components.storj.api.aioremove"),
     ):
         mock_backup.return_value = TEST_AGENT_BACKUP
         client = await hass_client()
