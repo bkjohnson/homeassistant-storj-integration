@@ -111,17 +111,18 @@ class StorjBackupAgent(BackupAgent):
         _LOGGER.debug("Downloading backup_id: %s", backup_id)
         try:
             backup = await self.async_get_backup(backup_id)
-            assert backup is not None
 
-            temp_file_location = await self._client.async_download_backup(
-                backup, self._backup_path
-            )
-            async with aiofiles.open(temp_file_location, "rb") as f:
-                return ChunkAsyncStreamIterator(await f.read())
+            if backup:
+                temp_file_location = await self._client.async_download_backup(
+                    backup, self._backup_path
+                )
+                async with aiofiles.open(temp_file_location, "rb") as f:
+                    return ChunkAsyncStreamIterator(await f.read())
         except (UplinkError, HomeAssistantError, TimeoutError) as err:
             raise BackupAgentError(
                 f"Failed to download backup {backup_id}: {err}"
             ) from err
+        raise BackupAgentError("Backup not found")
 
     async def async_delete_backup(
         self,
