@@ -23,7 +23,12 @@ from json_flatten import flatten
 import json
 import aiofiles
 
+
+from custom_components.storj.backup import (
+    async_register_backup_agents_listener,
+)
 from custom_components.storj.const import DOMAIN
+from custom_components.storj import DATA_BACKUP_AGENT_LISTENERS
 from .conftest import mock_asyncio_subprocess_run, TEST_AGENT_ID
 import pytest
 
@@ -83,6 +88,18 @@ async def setup_file_mock():
     aiofiles.threadpool.wrap.register(MagicMock)(
         lambda *args, **kwargs: aiofiles.threadpool.AsyncBufferedIOBase(*args, **kwargs)
     )
+
+
+async def test_listeners_get_cleaned_up(hass: HomeAssistant) -> None:
+    """Test listener gets cleaned up."""
+    listener = MagicMock()
+    remove_listener = async_register_backup_agents_listener(hass, listener=listener)
+
+    # make sure it's the last listener
+    hass.data[DATA_BACKUP_AGENT_LISTENERS] = [listener]
+    remove_listener()
+
+    assert hass.data.get(DATA_BACKUP_AGENT_LISTENERS) is None
 
 
 async def test_agents_upload(
