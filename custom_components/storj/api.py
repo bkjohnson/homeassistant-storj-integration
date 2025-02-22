@@ -32,6 +32,40 @@ class StorjClient:
         self._ha_instance_id = ha_instance_id
         self.bucket_name = bucket_name
 
+    async def install_uplink(self) -> bool:
+        """Intall the uplink binary if it is not already installed"""
+        which_proc = await asyncio.create_subprocess_exec(
+            "which",
+            "uplink",
+        )
+        await which_proc.communicate()
+        if which_proc.returncode == 0:
+            return True
+
+        curl_proc = await asyncio.create_subprocess_exec(
+            "curl",
+            "-L",
+            "https://github.com/storj/storj/releases/latest/download/uplink_linux_arm64.zip",
+            "-o",
+            "uplink_linux_arm64.zip",
+        )
+        await curl_proc.communicate()
+        assert curl_proc.returncode == 0
+
+        unzip_proc = await asyncio.create_subprocess_exec(
+            "unzip", "-o", "uplink_linux_arm64.zip"
+        )
+        await unzip_proc.communicate()
+        assert unzip_proc.returncode == 0
+
+        install_proc = await asyncio.create_subprocess_exec(
+            "install", "uplink", "/usr/local/bin/uplink"
+        )
+        await install_proc.communicate()
+        assert install_proc.returncode == 0
+
+        return True
+
     async def authenticate(self, access_grant: str) -> bool:
         """Test if we can authenticate with the host."""
         result = await asyncio.create_subprocess_exec(

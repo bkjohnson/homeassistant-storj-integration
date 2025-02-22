@@ -30,6 +30,7 @@ async def test_form(
     responses = iter([b"", json.dumps(access_json).encode("utf-8")])
 
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,
         patch(
             "custom_components.storj.api.async_ping",
@@ -71,6 +72,7 @@ async def test_form_invalid_auth(
 
     responses = iter([b"", json.dumps(access_json).encode("utf-8")])
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(
             responses=responses, returncode=1
         ) as subprocess_exec,
@@ -92,6 +94,7 @@ async def test_form_invalid_auth(
     # FlowResultType.CREATE_ENTRY or FlowResultType.ABORT so
     # we can show the config flow is able to recover from an error.
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(responses=responses, returncode=0),
         patch(
             "custom_components.storj.api.async_ping",
@@ -130,6 +133,7 @@ async def test_form_cannot_connect(
     responses = iter([b"", json.dumps(access_json).encode("utf-8")])
 
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,
         patch(
             "custom_components.storj.api.async_ping",
@@ -156,6 +160,7 @@ async def test_form_cannot_connect(
 
     responses = iter([b"", json.dumps(access_json).encode("utf-8")])
     with (
+        patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(responses=responses),
         patch(
             "custom_components.storj.api.async_ping",
