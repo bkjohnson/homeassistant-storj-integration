@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import instance_id
 from homeassistant.util.hass_dict import HassKey
 
@@ -22,23 +22,27 @@ DATA_BACKUP_AGENT_LISTENERS: HassKey[list[Callable[[], None]]] = HassKey(
 async def async_setup_entry(hass: HomeAssistant, entry: StorjConfigEntry) -> bool:
     """Set up storj from a config entry."""
 
-    # TODO 1. Create API instance
-    # TODO 2. Validate the API connection (and authentication)
-    # TODO 3. Store an API object for your platforms to access
-
+    # Validation happens in config_flow
     entry.runtime_data = StorjClient(
         await instance_id.async_get(hass), entry.data[CONF_BUCKET_NAME]
     )
+
+    _async_notify_backup_listeners_soon(hass)
 
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: StorjConfigEntry) -> bool:
     """Unload a config entry."""
-    hass.loop.call_soon(_notify_backup_listeners, hass)
+    _async_notify_backup_listeners_soon(hass)
     return True
 
 
-def _notify_backup_listeners(hass: HomeAssistant) -> None:
+def _async_notify_backup_listeners(hass: HomeAssistant) -> None:
     for listener in hass.data.get(DATA_BACKUP_AGENT_LISTENERS, []):
         listener()
+
+
+@callback
+def _async_notify_backup_listeners_soon(hass: HomeAssistant) -> None:
+    hass.loop.call_soon(_async_notify_backup_listeners, hass)
