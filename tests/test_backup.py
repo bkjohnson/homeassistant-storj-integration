@@ -77,6 +77,14 @@ async def setup_backup_integration(
         yield
 
 
+@pytest.fixture(autouse=True)
+async def setup_file_mock():
+    """Mock aiofiles so our read attempts don't fail"""
+    aiofiles.threadpool.wrap.register(MagicMock)(
+        lambda *args, **kwargs: aiofiles.threadpool.AsyncBufferedIOBase(*args, **kwargs)
+    )
+
+
 async def test_agents_upload(
     hass: HomeAssistant,
     hass_client: ClientSessionGenerator,
@@ -352,11 +360,6 @@ async def test_agents_delete_not_found(
         assert response["success"]
         assert response["result"] == {"agent_errors": {}}
         assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
-
-
-aiofiles.threadpool.wrap.register(MagicMock)(
-    lambda *args, **kwargs: aiofiles.threadpool.AsyncBufferedIOBase(*args, **kwargs)
-)
 
 
 async def test_agents_download(
