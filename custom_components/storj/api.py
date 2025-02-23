@@ -69,7 +69,7 @@ class StorjClient:
     async def authenticate(self, access_grant: str) -> bool:
         """Test if we can authenticate with the host."""
         result = await asyncio.create_subprocess_exec(
-            "uplink", "access", "import", "ha2", access_grant
+            "uplink", "access", "import", "ha2", access_grant, "--force"
         )
         await result.communicate()
 
