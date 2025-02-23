@@ -64,12 +64,15 @@ TEST_AGENT_BACKUP_RESULT = {
 
 @pytest.fixture(autouse=True)
 async def setup_backup_integration(
+    request,
     hass: HomeAssistant,
     mock_config_entry: MockConfigEntry,
 ) -> AsyncGenerator[None]:
     """Set up Storj integration."""
+
+    is_hassio = request.node.get_closest_marker("is_hassio") or False
     with (
-        patch("homeassistant.components.backup.is_hassio", return_value=False),
+        patch("custom_components.storj.backup.is_hassio", return_value=is_hassio),
         patch("homeassistant.components.backup.store.STORE_DELAY_SAVE", 0),
     ):
         assert await async_setup_component(hass, BACKUP_DOMAIN, {BACKUP_DOMAIN: {}})
@@ -141,6 +144,37 @@ async def test_agents_upload(
         assert f"Uploaded backup: {TEST_AGENT_BACKUP.backup_id}" in caplog.text
         subprocess_exec.assert_called_once()
         assert snapshot(matcher=matcher) == subprocess_exec.mock_calls[0].args
+
+
+@pytest.mark.is_hassio(True)
+async def test_agents_upload_in_hassio(
+    hass: HomeAssistant,
+    hass_client: ClientSessionGenerator,
+    mock_config_entry: MockConfigEntry,
+    snapshot: SnapshotAssertion,
+) -> None:
+    """Test agent reads backup from correct location."""
+
+    assert await async_setup_component(hass, BACKUP_DOMAIN, {})
+    client = await hass_client()
+
+    with (
+        patch(
+            "homeassistant.components.backup.manager.read_backup",
+            return_value=TEST_AGENT_BACKUP,
+        ),
+        mock_asyncio_subprocess_run(
+            responses=iter([b""]), returncode=0
+        ) as subprocess_exec,
+    ):
+
+        resp = await client.post(
+            f"/api/backup/upload?agent_id={DOMAIN}.{mock_config_entry.unique_id}",
+            data={"file": StringIO("test")},
+        )
+
+        assert resp.status == 201
+        assert snapshot() == subprocess_exec.mock_calls[0].args
 
 
 async def test_agents_upload_fail(

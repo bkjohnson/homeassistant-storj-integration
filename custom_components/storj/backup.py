@@ -10,6 +10,7 @@ from typing import Any
 from homeassistant.components.backup import AgentBackup, BackupAgent, BackupAgentError
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.hassio import is_hassio
 
 from . import DATA_BACKUP_AGENT_LISTENERS, StorjConfigEntry
 from .api import UplinkError
@@ -61,7 +62,9 @@ class StorjBackupAgent(BackupAgent):
         self.hass = hass
         self.name = config_entry.title
         self.unique_id = config_entry.unique_id
-        self._backup_path = Path(hass.config.path("backups"))
+        self._backup_path = (
+            Path("/backup") if is_hassio(hass) else Path(hass.config.path("backups"))
+        )
         self._client = config_entry.runtime_data
 
     async def async_upload_backup(
