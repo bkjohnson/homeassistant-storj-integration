@@ -119,9 +119,16 @@ class StorjClient:
             f"sj://{self.bucket_name}/backups/",
             "--metadata",
             json.dumps(backup_metadata),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
         )
-        await result.communicate()
+        stdout, stderr = await result.communicate()
         if result.returncode != 0:
+            _LOGGER.error(
+                "Error during upload - [stdout]: %s [stderr]: %s",
+                stdout.decode(),
+                stderr.decode(),
+            )
             raise UplinkError("Unable to complete upload")
 
         _LOGGER.debug("Uploaded backup: %s to '%s'", backup.backup_id, self.bucket_name)
