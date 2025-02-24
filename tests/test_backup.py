@@ -98,7 +98,7 @@ async def tempfile_mock() -> Generator[Mock]:
         "custom_components.storj.api.NamedTemporaryFile", autospec=True
     ) as mock_tempfile:
         file = mock_tempfile.return_value.__enter__.return_value
-        file.name = "test.tar"
+        file.name = "tmp.tar"
         yield file
 
 
@@ -146,16 +146,11 @@ async def test_agents_upload(
             data={"file": StringIO("test")},
         )
 
-        matcher = path_type(
-            mapping={"2": (str,)},
-            replacer=lambda data, _: data[data.find("backups") :],
-        )
-
         assert resp.status == 201
         assert f"Uploading backup: {TEST_AGENT_BACKUP.backup_id}" in caplog.text
         assert f"Uploaded backup: {TEST_AGENT_BACKUP.backup_id}" in caplog.text
         subprocess_exec.assert_called_once()
-        assert snapshot(matcher=matcher) == subprocess_exec.mock_calls[0].args
+        assert snapshot() == subprocess_exec.mock_calls[0].args
 
 
 @pytest.mark.is_hassio(True)
