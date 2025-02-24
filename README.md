@@ -7,13 +7,6 @@
 [![pre-commit][pre-commit-shield]][pre-commit]
 [![Black][black-shield]][black]
 
-[![hacs][hacsbadge]][hacs]
-[![Project Maintenance][maintenance-shield]][user_profile]
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
-
-[![Discord][discord-shield]][discord]
-[![Community Forum][forum-shield]][forum]
-
 This integration allows you to connect your [Storj][storj] account with Home Assistant Backups. When you set up this integration, you will have a new folder called `backups` in the given bucket where all the backups will be stored.
 
 ## Prerequisites
@@ -83,12 +76,6 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
 [commits-shield]: https://img.shields.io/github/commit-activity/y/bkjohnson/homeassistant-storj-integration.svg?style=for-the-badge
 [commits]: https://github.com/bkjohnson/homeassistant-storj-integration/commits/main
-[hacs]: https://hacs.xyz
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
-[discord]: https://discord.gg/Qa5fW2R
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
-[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
-[forum]: https://community.home-assistant.io/
 [license-shield]: https://img.shields.io/github/license/bkjohnson/homeassistant-storj-integration.svg?style=for-the-badge
 [maintenance-shield]: https://img.shields.io/badge/maintainer-%40bkjohnson-blue.svg?style=for-the-badge
 [pre-commit]: https://github.com/pre-commit/pre-commit
