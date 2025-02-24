@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Callable, Coroutine
 import json
 import logging
 from pathlib import Path
+from tempfile import NamedTemporaryFile
+from typing import Any
 
 import aiofiles
 from aiofiles.os import remove as aioremove
@@ -98,7 +100,7 @@ class StorjClient:
 
     async def async_upload_backup(
         self,
-        backup_path: Path,
+        open_stream: Callable[[], Coroutine[Any, Any, AsyncIterator[bytes]]],
         backup: AgentBackup,
     ) -> None:
         """Upload a backup."""
@@ -110,28 +112,32 @@ class StorjClient:
             suggested_filename(backup),
             backup_metadata,
         )
-
-        backup_location = str(backup_path.joinpath(suggested_filename(backup)))
-        result = await asyncio.create_subprocess_exec(
-            "uplink",
-            "cp",
-            backup_location,
-            f"sj://{self.bucket_name}/backups/",
-            "--metadata",
-            json.dumps(backup_metadata),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await result.communicate()
-        if result.returncode != 0:
-            _LOGGER.error(
-                "Error during upload - [stdout]: %s [stderr]: %s",
-                stdout.decode(),
-                stderr.decode(),
+        with NamedTemporaryFile(mode="ab") as fp:
+            async for chunk in await open_stream():
+                fp.write(chunk)
+            result = await asyncio.create_subprocess_exec(
+                "uplink",
+                "cp",
+                fp.name,
+                f"sj://{self.bucket_name}/backups/{suggested_filename(backup)}",
+                "--metadata",
+                json.dumps(backup_metadata),
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
             )
-            raise UplinkError("Unable to complete upload")
+            stdout, stderr = await result.communicate()
+            fp.close()
+            if result.returncode != 0:
+                _LOGGER.error(
+                    "Error during upload - [stdout]: %s [stderr]: %s",
+                    stdout.decode(),
+                    stderr.decode(),
+                )
+                raise UplinkError("Unable to complete upload")
 
-        _LOGGER.debug("Uploaded backup: %s to '%s'", backup.backup_id, self.bucket_name)
+            _LOGGER.debug(
+                "Uploaded backup: %s to '%s'", backup.backup_id, self.bucket_name
+            )
 
     async def _get_metadata(self, filename: str) -> dict[str, str]:
         result = await asyncio.create_subprocess_exec(

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Callable, Coroutine
 import logging
 from pathlib import Path
 from typing import Any
@@ -70,6 +70,7 @@ class StorjBackupAgent(BackupAgent):
     async def async_upload_backup(
         self,
         *,
+        open_stream: Callable[[], Coroutine[Any, Any, AsyncIterator[bytes]]],
         backup: AgentBackup,
         **kwargs: Any,
     ) -> None:
@@ -77,7 +78,7 @@ class StorjBackupAgent(BackupAgent):
         :param backup: Metadata about the backup that should be uploaded.
         """
         try:
-            await self._client.async_upload_backup(self._backup_path, backup)
+            await self._client.async_upload_backup(open_stream, backup)
         except (UplinkError, HomeAssistantError, TimeoutError) as err:
             raise BackupAgentError(f"Failed to upload backup: {err}") from err
 

@@ -121,8 +121,8 @@
   tuple(
     'uplink',
     'cp',
-    'backups/Test_2025-01-01_01.23_45678000.tar',
-    'sj://ha-backups/backups/',
+    'tmp.tar',
+    'sj://ha-backups/backups/Test_2025-01-01_01.23_45678000.tar',
     '--metadata',
     '{"addons.[0].name": "Test", "addons.[0].slug": "test", "addons.[0].version": "1.0.0", "backup_id": "test-backup", "date": "2025-01-01T01:23:45.678Z", "database_included$bool": "True", "extra_metadata.with_automatic_settings$bool": "False", "folders$emptylist": "[]", "homeassistant_included$bool": "True", "homeassistant_version": "2024.12.0", "name": "Test", "protected$bool": "False", "size$int": "987"}',
   )
@@ -131,8 +131,8 @@
   tuple(
     'uplink',
     'cp',
-    '/backup/Test_2025-01-01_01.23_45678000.tar',
-    'sj://ha-backups/backups/',
+    'tmp.tar',
+    'sj://ha-backups/backups/Test_2025-01-01_01.23_45678000.tar',
     '--metadata',
     '{"addons.[0].name": "Test", "addons.[0].slug": "test", "addons.[0].version": "1.0.0", "backup_id": "test-backup", "date": "2025-01-01T01:23:45.678Z", "database_included$bool": "True", "extra_metadata.with_automatic_settings$bool": "False", "folders$emptylist": "[]", "homeassistant_included$bool": "True", "homeassistant_version": "2024.12.0", "name": "Test", "protected$bool": "False", "size$int": "987"}',
   )
