@@ -78,9 +78,7 @@ class StorjBackupAgent(BackupAgent):
         :param backup: Metadata about the backup that should be uploaded.
         """
         try:
-            await self._client.async_upload_backup(
-                self._backup_path, open_stream, backup
-            )
+            await self._client.async_upload_backup(open_stream, backup)
         except (UplinkError, HomeAssistantError, TimeoutError) as err:
             raise BackupAgentError(f"Failed to upload backup: {err}") from err
 

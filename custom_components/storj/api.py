@@ -100,7 +100,6 @@ class StorjClient:
 
     async def async_upload_backup(
         self,
-        backup_path: Path,
         open_stream: Callable[[], Coroutine[Any, Any, AsyncIterator[bytes]]],
         backup: AgentBackup,
     ) -> None:
