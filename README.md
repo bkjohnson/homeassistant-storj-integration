@@ -52,7 +52,7 @@ Next, search for "Storj" from the integrations page and proceed with the configu
 ## Known Limitations
 
 - Downloading from the Storj location requires downloading to your Home Assistant instance first before you can download the backup using your browser.
-- Uploading a backup requires that you use the System location as well so that the file can be read into the Storj platform.
+- Uploading a backup will write the data to a temp file first, so you must have enough space available on your Home Assistant instance.
 
 <!---->
 
