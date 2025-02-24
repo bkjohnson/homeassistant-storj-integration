@@ -7,7 +7,7 @@ from pytest_homeassistant_custom_component.typing import (
     WebSocketGenerator,
 )
 
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Generator
 from io import StringIO
 import json
 from typing import Any
@@ -91,6 +91,17 @@ async def setup_file_mock():
     )
 
 
+@pytest.fixture
+async def tempfile_mock() -> Generator[Mock]:
+    """Mock tempfile so we can have a consistent name"""
+    with patch(
+        "custom_components.storj.api.NamedTemporaryFile", autospec=True
+    ) as mock_tempfile:
+        file = mock_tempfile.return_value.__enter__.return_value
+        file.name = "test.tar"
+        yield file
+
+
 async def test_listeners_get_cleaned_up(hass: HomeAssistant) -> None:
     """Test listener gets cleaned up."""
     listener = MagicMock()
@@ -108,6 +119,7 @@ async def test_agents_upload(
     hass_client: ClientSessionGenerator,
     caplog: pytest.LogCaptureFixture,
     mock_config_entry: MockConfigEntry,
+    tempfile_mock: Generator[Mock],
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent upload backup."""
@@ -151,6 +163,7 @@ async def test_agents_upload_in_hassio(
     hass: HomeAssistant,
     hass_client: ClientSessionGenerator,
     mock_config_entry: MockConfigEntry,
+    tempfile_mock: Generator[Mock],
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent reads backup from correct location."""
