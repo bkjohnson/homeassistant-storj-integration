@@ -72,16 +72,12 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint
 [black]: https://github.com/psf/black
 [black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg
-[buymecoffee]: https://www.buymeacoffee.com/bkjohnson
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg
 [commits-shield]: https://img.shields.io/github/commit-activity/y/bkjohnson/homeassistant-storj-integration.svg
 [commits]: https://github.com/bkjohnson/homeassistant-storj-integration/commits/main
 [license-shield]: https://img.shields.io/github/license/bkjohnson/homeassistant-storj-integration.svg
-[maintenance-shield]: https://img.shields.io/badge/maintainer-%40bkjohnson-blue.svg
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen
 [releases-shield]: https://img.shields.io/github/release/bkjohnson/homeassistant-storj-integration.svg
 [releases]: https://github.com/bkjohnson/homeassistant-storj-integration/releases
 [storj]: https://www.storj.io
 [uplink]: https://storj.dev/dcs/api/uplink-cli/installation
-[user_profile]: https://github.com/bkjohnson
