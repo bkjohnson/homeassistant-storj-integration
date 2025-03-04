@@ -7,7 +7,12 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from homeassistant.components.backup import AgentBackup, BackupAgent, BackupAgentError
+from homeassistant.components.backup import (
+    AgentBackup,
+    BackupAgent,
+    BackupAgentError,
+    BackupNotFound,
+)
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.hassio import is_hassio
@@ -93,13 +98,13 @@ class StorjBackupAgent(BackupAgent):
         self,
         backup_id: str,
         **kwargs: Any,
-    ) -> AgentBackup | None:
+    ) -> AgentBackup:
         """Return a backup."""
         backups = await self.async_list_backups()
         for backup in backups:
             if backup.backup_id == backup_id:
                 return backup
-        return None
+        raise BackupNotFound(f"Backup {backup_id} not found")
 
     async def async_download_backup(
         self,
@@ -118,11 +123,12 @@ class StorjBackupAgent(BackupAgent):
                 return await self._client.async_download_backup(
                     backup, self._backup_path
                 )
+                return
         except (UplinkError, HomeAssistantError, TimeoutError) as err:
             raise BackupAgentError(
                 f"Failed to download backup {backup_id}: {err}"
             ) from err
-        raise BackupAgentError("Backup not found")
+        raise BackupNotFound(f"Backup {backup_id} not found")
 
     async def async_delete_backup(
         self,
@@ -138,7 +144,9 @@ class StorjBackupAgent(BackupAgent):
 
             if backup:
                 await self._client.async_delete_backup(backup)
+                return
         except (UplinkError, HomeAssistantError, TimeoutError) as err:
             raise BackupAgentError(
                 f"Failed to delete backup {backup_id}: {err}"
             ) from err
+        raise BackupNotFound(f"Backup {backup_id} not found")
