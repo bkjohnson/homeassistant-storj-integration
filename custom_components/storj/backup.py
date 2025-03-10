@@ -123,7 +123,6 @@ class StorjBackupAgent(BackupAgent):
                 return await self._client.async_download_backup(
                     backup, self._backup_path
                 )
-                return
         except (UplinkError, HomeAssistantError, TimeoutError) as err:
             raise BackupAgentError(
                 f"Failed to download backup {backup_id}: {err}"
