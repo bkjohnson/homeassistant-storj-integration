@@ -127,7 +127,6 @@ class StorjBackupAgent(BackupAgent):
             raise BackupAgentError(
                 f"Failed to download backup {backup_id}: {err}"
             ) from err
-        raise BackupNotFound(f"Backup {backup_id} not found")
 
     async def async_delete_backup(
         self,
