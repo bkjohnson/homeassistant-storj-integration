@@ -20,6 +20,7 @@ from homeassistant.components.backup import (
     AgentBackup,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.backup import async_initialize_backup
 from homeassistant.setup import async_setup_component
 from json_flatten import flatten
 from syrupy.assertion import SnapshotAssertion
@@ -70,6 +71,7 @@ async def setup_backup_integration(
 ) -> AsyncGenerator[None]:
     """Set up Storj integration."""
 
+    async_initialize_backup(hass)
     is_hassio = request.node.get_closest_marker("is_hassio") or False
     with (
         patch("custom_components.storj.backup.is_hassio", return_value=is_hassio),
