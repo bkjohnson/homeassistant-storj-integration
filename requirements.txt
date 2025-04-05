@@ -1,5 +1,5 @@
 pip==25.0.1
-homeassistant>=2025.2.5
+homeassistant==2025.2.5
 aiofiles==24.1.0
 
 # Linting
