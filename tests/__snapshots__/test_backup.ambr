@@ -59,6 +59,7 @@
       'sj://ha-backups/backups/backup.tar',
     ),
   ])
+# ---
 # name: test_agents_download
   tuple(
     'uplink',
@@ -90,6 +91,7 @@
       'json',
     ),
   ])
+# ---
 # name: test_agents_download_temp_fail
   tuple(
     'uplink',
