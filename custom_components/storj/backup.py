@@ -140,11 +140,8 @@ class StorjBackupAgent(BackupAgent):
         try:
             backup = await self.async_get_backup(backup_id)
 
-            if backup:
-                await self._client.async_delete_backup(backup)
-                return
+            await self._client.async_delete_backup(backup)
         except (UplinkError, HomeAssistantError, TimeoutError) as err:
             raise BackupAgentError(
                 f"Failed to delete backup {backup_id}: {err}"
             ) from err
-        raise BackupNotFound(f"Backup {backup_id} not found")
