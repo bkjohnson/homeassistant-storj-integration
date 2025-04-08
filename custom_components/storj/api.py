@@ -6,8 +6,9 @@ import asyncio
 from collections.abc import AsyncIterator, Callable, Coroutine
 import json
 import logging
+import os
 from pathlib import Path
-from tempfile import NamedTemporaryFile
+import tempfile
 from typing import Any
 
 import aiofiles
@@ -106,13 +107,20 @@ class StorjClient:
         """Upload a backup."""
 
         backup_metadata = flatten(backup.as_dict())
+        tempfile.tempdir = None
+        os.environ["TMPDIR"] = str(Path.home())
+        _LOGGER.debug(
+            "TMPDIR reset to: %s",
+            os.environ["TMPDIR"],
+        )
+
         _LOGGER.debug(
             "Uploading backup: %s as %s with metadata: %s",
             backup.backup_id,
             suggested_filename(backup),
             backup_metadata,
         )
-        with NamedTemporaryFile(mode="ab") as fp:
+        with tempfile.NamedTemporaryFile(mode="ab") as fp:
             async for chunk in await open_stream():
                 fp.write(chunk)
             result = await asyncio.create_subprocess_exec(
