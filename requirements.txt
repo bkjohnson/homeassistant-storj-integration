@@ -1,5 +1,5 @@
 pip==25.0.1
-homeassistant==2025.2.5
+homeassistant>=2025.4.1
 aiofiles==24.1.0
 
 # Linting
@@ -17,4 +17,4 @@ json_flatten==0.3.1
 icmplib==3.0.4
 
 # Testing
-pytest-homeassistant-custom-component>=0.13.214
+pytest-homeassistant-custom-component>=0.13.233
