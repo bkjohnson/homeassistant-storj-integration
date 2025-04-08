@@ -11,6 +11,8 @@ This integration allows you to connect your [Storj][storj] account with Home Ass
 
 ## Prerequisites
 
+Your HomeAssistant version must be at least version `2025.4.0`.
+
 You need to have a Storj account along with an [Access Grant that you created][access-grant]. The [`uplink` CLI tool][uplink] will also need to be installed on your Home Assistant instance.
 
 ## Installation
