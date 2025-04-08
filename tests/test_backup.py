@@ -97,7 +97,7 @@ async def setup_file_mock():
 async def tempfile_mock() -> Generator[Mock]:
     """Mock tempfile so we can have a consistent name"""
     with patch(
-        "custom_components.storj.api.NamedTemporaryFile", autospec=True
+        "custom_components.storj.api.tempfile.NamedTemporaryFile", autospec=True
     ) as mock_tempfile:
         file = mock_tempfile.return_value.__enter__.return_value
         file.name = "tmp.tar"
