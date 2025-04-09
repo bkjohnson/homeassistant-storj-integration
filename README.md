@@ -5,7 +5,7 @@
 [![License][license-shield]](LICENSE)
 
 [![pre-commit][pre-commit-shield]][pre-commit]
-[![Black][black-shield]][black]
+[![Ruff][ruff-shield]][ruff]
 
 This integration allows you to connect your [Storj][storj] account with Home Assistant Backups. When you set up this integration, you will have a new folder called `backups` in the given bucket where all the backups will be stored.
 
@@ -72,8 +72,8 @@ Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [in
 
 [access-grant]: https://storj.dev/dcs/access#create-access-grant
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint
-[black]: https://github.com/psf/black
-[black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg
+[ruff]: https://github.com/astral-sh/ruff
+[ruff-shield]: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
 [commits-shield]: https://img.shields.io/github/commit-activity/y/bkjohnson/homeassistant-storj-integration.svg
 [commits]: https://github.com/bkjohnson/homeassistant-storj-integration/commits/main
 [license-shield]: https://img.shields.io/github/license/bkjohnson/homeassistant-storj-integration.svg

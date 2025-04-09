@@ -140,7 +140,6 @@ async def test_agents_upload(
         patch("pathlib.Path.open") as mocked_open,
         mock_asyncio_subprocess_run(returncode=0) as subprocess_exec,
     ):
-
         mocked_open.return_value.read = Mock(side_effect=[b"test", b""])
         fetch_backup.return_value = TEST_AGENT_BACKUP
         resp = await client.post(
@@ -177,7 +176,6 @@ async def test_agents_upload_in_hassio(
             responses=iter([b""]), returncode=0
         ) as subprocess_exec,
     ):
-
         resp = await client.post(
             f"/api/backup/upload?agent_id={DOMAIN}.{mock_config_entry.unique_id}",
             data={"file": StringIO("test")},
@@ -212,7 +210,6 @@ async def test_agents_upload_fail(
             returncode=1, responses=iter([b""])
         ) as subprocess_exec,
     ):
-
         mocked_open.return_value.read = Mock(side_effect=[b"test", b""])
         fetch_backup.return_value = TEST_AGENT_BACKUP
         resp = await client.post(
@@ -244,7 +241,9 @@ async def test_agents_list_backups(
         ]
     )
 
-    with (mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,):
+    with (
+        mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,
+    ):
         client = await hass_ws_client(hass)
         await client.send_json_auto_id({"type": "backup/info"})
         response = await client.receive_json()
@@ -404,7 +403,6 @@ async def test_agents_delete_not_found(
     with mock_asyncio_subprocess_run(
         responses=responses, returncode=iter([0, 0])
     ) as subprocess_exec:
-
         client = await hass_ws_client(hass)
         backup_id = "1234"
 
@@ -538,7 +536,9 @@ async def test_agents_download_metadata_not_found(
         ]
     )
 
-    with (mock_asyncio_subprocess_run(responses=responses, returncode=0),):
+    with (
+        mock_asyncio_subprocess_run(responses=responses, returncode=0),
+    ):
         client = await hass_client()
         backup_id = "1234"
         assert backup_id != TEST_AGENT_BACKUP.backup_id
