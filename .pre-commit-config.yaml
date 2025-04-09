@@ -6,14 +6,16 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.11.4
+    hooks:
+      # Run the linter.
+      - id: ruff
+      # Run the formatter.
+      - id: ruff-format
   - repo: local
     hooks:
-      - id: isort
-        name: isort
-        entry: isort
-        language: system
-        types: [python]
-        require_serial: true
       - id: mypy
         name: mypy
         entry: mypy
@@ -21,18 +23,6 @@ repos:
         require_serial: true
         types_or: [python, pyi]
         files: ^(custom_components)/.+\.(py|pyi)$
-      - id: black
-        name: black
-        entry: black
-        language: system
-        types: [python]
-        require_serial: true
-      - id: flake8
-        name: flake8
-        entry: flake8
-        language: system
-        types: [python]
-        require_serial: true
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v2.2.1
     hooks:
