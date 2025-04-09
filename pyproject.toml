@@ -1,4 +1,6 @@
 [tool.ruff.lint]
+# Sort imports
+select = ["I"]
 exclude = ['.venv', '.git' , '.tox', 'docs', 'venv', 'bin', 'lib', 'deps', 'build']
 
 [tool.ruff.lint.isort]
