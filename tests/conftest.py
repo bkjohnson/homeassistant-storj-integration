@@ -49,15 +49,6 @@ def mock_config_entry() -> MockConfigEntry:
         data={"access_grant": TEST_ACCESS_GRANT, "bucket_name": "ha-backups"},
     )
 
-@pytest.fixture
-def mock_api() -> Generator[MagicMock]:
-    """Return a mocked Uplink."""
-    with patch(
-        "custom_components.storj.api.Uplink"
-    ) as mock_api_cl:
-        mock_api = mock_api_cl.return_value
-        yield mock_api
-
 
 @pytest.fixture
 def mock_access() -> Generator[MagicMock]:

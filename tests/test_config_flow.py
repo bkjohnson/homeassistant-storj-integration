@@ -61,7 +61,7 @@ async def test_form(
 async def test_form_uplink_already_installed(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    mock_api: MagicMock,
+    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we get the form."""
@@ -96,7 +96,7 @@ async def test_form_uplink_already_installed(
 async def test_form_uplink_needs_installation(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    mock_api: MagicMock,
+    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we get the form."""
@@ -132,7 +132,7 @@ async def test_form_uplink_needs_installation(
 async def test_form_invalid_auth(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    mock_api: MagicMock,
+    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we handle invalid auth."""
