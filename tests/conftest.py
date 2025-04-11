@@ -59,26 +59,6 @@ def mock_api() -> Generator[MagicMock]:
         yield mock_api
 
 
-@pytest.fixture(name="access_json")
-def access_json() -> dict[str, Any]:
-    """Fixture for MockConfigEntry."""
-    return {
-        "satellite_addr": "123abcDEFxyz@my.storj-satellite.io:7777",
-        "encryption_access": {
-            "default_key": "ABCxyz=",
-            "default_path_cipher": "ENC_AEGSCM",
-        },
-        "api_key": "135abc975XyZ",
-        "macaroon": {
-            "head": "abc123=",
-            "caveats": [
-                {"not_before": "2025-02-02T02:28:23.709Z", "nonce": "dOMuVw=="}
-            ],
-            "tail": "xyz987=",
-        },
-    }
-
-
 @pytest.fixture
 def mock_access() -> Generator[MagicMock]:
     """Return a mocked Access."""

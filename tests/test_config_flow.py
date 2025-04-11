@@ -61,7 +61,6 @@ async def test_form(
 async def test_form_uplink_already_installed(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    access_json: dict[str, Any],
     mock_api: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
@@ -72,7 +71,7 @@ async def test_form_uplink_already_installed(
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {}
 
-    responses = iter([b"", b"", json.dumps(access_json).encode("utf-8")])
+    responses = iter([b"", b""])
 
     with (
         mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,
@@ -97,7 +96,6 @@ async def test_form_uplink_already_installed(
 async def test_form_uplink_needs_installation(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    access_json: dict[str, Any],
     mock_api: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
@@ -108,7 +106,7 @@ async def test_form_uplink_needs_installation(
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {}
 
-    responses = iter([b"", b"", b"", b"", json.dumps(access_json).encode("utf-8")])
+    responses = iter([b"", b"", b"", b""])
 
     with (
         mock_asyncio_subprocess_run(
@@ -134,7 +132,6 @@ async def test_form_uplink_needs_installation(
 async def test_form_invalid_auth(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    access_json: dict[str, Any],
     mock_api: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
@@ -143,7 +140,8 @@ async def test_form_invalid_auth(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
 
-    responses = iter([b"", json.dumps(access_json).encode("utf-8")])
+    responses = iter([b""])
+
     with (
         patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(
@@ -162,7 +160,7 @@ async def test_form_invalid_auth(
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {"base": "invalid_auth"}
 
-    responses = iter([b"", json.dumps(access_json).encode("utf-8")])
+    responses = iter([b""])
     # Make sure the config flow tests finish with either an
     # FlowResultType.CREATE_ENTRY or FlowResultType.ABORT so
     # we can show the config flow is able to recover from an error.
@@ -260,7 +258,6 @@ async def test_form_cannot_connect(
 
 async def test_form_unknown_error(
     hass: HomeAssistant,
-    access_json: dict[str, Any],
     mock_setup_entry: AsyncMock,
     snapshot: SnapshotAssertion,
 ) -> None:
