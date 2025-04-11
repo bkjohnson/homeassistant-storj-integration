@@ -12,7 +12,7 @@ import asyncio
 from collections.abc import Coroutine, Generator
 from contextlib import contextmanager
 from typing import Any, Iterable, cast
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, Mock, MagicMock, patch
 
 from homeassistant.components.websocket_api.auth import (
     TYPE_AUTH,
@@ -77,6 +77,16 @@ def access_json() -> dict[str, Any]:
             "tail": "xyz987=",
         },
     }
+
+
+@pytest.fixture
+def mock_access() -> Generator[MagicMock]:
+    """Return a mocked Access."""
+    with patch("custom_components.storj.api.Uplink.parse_access") as mock_access_cl:
+        mock_access_cl.return_value.satellite_address = Mock(
+            return_value="123abcDEFxyz@my.storj-satellite.io:7777"
+        )
+        yield mock_access_cl
 
 
 @pytest.fixture

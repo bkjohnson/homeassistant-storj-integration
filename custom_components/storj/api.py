@@ -74,7 +74,8 @@ class StorjClient:
 
     async def authenticate(self, access_grant: str) -> bool:
         """Test if we can authenticate with the host."""
-        self._project = self._uplink.parse_access(access_grant)
+        self._access = self._uplink.parse_access(access_grant)
+        self._project = self._access
 
         result = await asyncio.create_subprocess_exec(
             "uplink", "access", "import", "ha2", access_grant, "--force"
@@ -86,16 +87,9 @@ class StorjClient:
     async def satelitte_is_live(self) -> bool:
         """Check to see if the satellite contained in the access grant is reachable."""
 
-        result = await asyncio.create_subprocess_exec(
-            "uplink",
-            "access",
-            "inspect",
-            "ha2",
-            stdout=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await result.communicate()
-        json_access = json.loads(stdout.decode())
-        url = json_access["satellite_addr"].split("@")[-1]
+        sat_addr = self._access.satellite_address()
+        url = sat_addr.split("@")[-1]
+
         # We don't want the port
         host = url.split(":")[0]
 

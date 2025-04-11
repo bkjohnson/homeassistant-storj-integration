@@ -2,7 +2,7 @@
 
 import json
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, Mock, MagicMock, patch
 
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
@@ -17,8 +17,7 @@ from .conftest import mock_asyncio_subprocess_run
 async def test_form(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    access_json: dict[str, Any],
-    mock_api: MagicMock,
+    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we get the form."""
@@ -28,11 +27,9 @@ async def test_form(
     assert result["type"] is FlowResultType.FORM
     assert result["errors"] == {}
 
-    responses = iter([b"", json.dumps(access_json).encode("utf-8")])
-
     with (
         patch("custom_components.storj.api.StorjClient.install_uplink"),
-        mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,
+        mock_asyncio_subprocess_run(iter([b""])) as subprocess_exec,
         patch(
             "custom_components.storj.api.async_ping",
             return_value=AsyncMock(is_alive=True),
@@ -47,6 +44,7 @@ async def test_form(
         )
         await hass.async_block_till_done()
         assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
+        assert [mock_call.args for mock_call in mock_access.mock_calls] == snapshot
         assert snapshot() == mocked_ping.mock_calls[0].args
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
@@ -196,9 +194,8 @@ async def test_form_invalid_auth(
 
 async def test_form_cannot_connect(
     hass: HomeAssistant,
-    access_json: dict[str, Any],
     mock_setup_entry: AsyncMock,
-    mock_api: MagicMock,
+    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we handle cannot connect error."""
@@ -206,7 +203,7 @@ async def test_form_cannot_connect(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
 
-    responses = iter([b"", json.dumps(access_json).encode("utf-8")])
+    responses = iter([b""])
 
     with (
         patch("custom_components.storj.api.StorjClient.install_uplink"),
@@ -234,7 +231,7 @@ async def test_form_cannot_connect(
     # FlowResultType.CREATE_ENTRY or FlowResultType.ABORT so
     # we can show the config flow is able to recover from an error.
 
-    responses = iter([b"", json.dumps(access_json).encode("utf-8")])
+    responses = iter([b""])
     with (
         patch("custom_components.storj.api.StorjClient.install_uplink"),
         mock_asyncio_subprocess_run(responses=responses),
