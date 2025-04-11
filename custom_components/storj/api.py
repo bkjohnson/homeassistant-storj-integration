@@ -15,6 +15,7 @@ import aiofiles
 from aiofiles.os import remove as aioremove
 from homeassistant.components.backup import AgentBackup, suggested_filename
 from homeassistant.exceptions import HomeAssistantError
+from storj_uplink.uplink import Uplink
 from icmplib import async_ping  # type: ignore
 from json_flatten import flatten, unflatten  # type: ignore
 
@@ -34,6 +35,8 @@ class StorjClient:
         """Initialize."""
         self._ha_instance_id = ha_instance_id
         self.bucket_name = bucket_name
+        self._uplink = Uplink()
+        self._project = None
 
     async def install_uplink(self) -> bool:
         """Intall the uplink binary if it is not already installed"""
@@ -71,6 +74,8 @@ class StorjClient:
 
     async def authenticate(self, access_grant: str) -> bool:
         """Test if we can authenticate with the host."""
+        self._project = self._uplink.parse_access(access_grant)
+
         result = await asyncio.create_subprocess_exec(
             "uplink", "access", "import", "ha2", access_grant, "--force"
         )
