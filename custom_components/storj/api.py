@@ -15,9 +15,9 @@ import aiofiles
 from aiofiles.os import remove as aioremove
 from homeassistant.components.backup import AgentBackup, suggested_filename
 from homeassistant.exceptions import HomeAssistantError
-from storj_uplink.uplink import Uplink
 from icmplib import async_ping  # type: ignore
 from json_flatten import flatten, unflatten  # type: ignore
+from storj_uplink.uplink import Uplink
 
 from .helpers import ChunkAsyncStreamIterator
 

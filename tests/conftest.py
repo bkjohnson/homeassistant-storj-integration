@@ -12,7 +12,7 @@ import asyncio
 from collections.abc import Coroutine, Generator
 from contextlib import contextmanager
 from typing import Any, Iterable, cast
-from unittest.mock import AsyncMock, Mock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 from homeassistant.components.websocket_api.auth import (
     TYPE_AUTH,
