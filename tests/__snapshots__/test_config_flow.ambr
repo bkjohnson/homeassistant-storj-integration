@@ -12,15 +12,6 @@
   ])
 # ---
 # name: test_form.1
-  list([
-    tuple(
-      'abc123xyz',
-    ),
-    tuple(
-    ),
-  ])
-# ---
-# name: test_form.2
   tuple(
     'my.storj-satellite.io',
   )

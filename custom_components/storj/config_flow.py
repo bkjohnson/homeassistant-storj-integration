@@ -28,10 +28,14 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     """Validate the user input allows us to connect.
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
-    client = StorjClient(await instance_id.async_get(hass), data[CONF_BUCKET_NAME])
+    client = StorjClient(
+        await instance_id.async_get(hass),
+        data[CONF_BUCKET_NAME],
+        data[CONF_ACCESS_GRANT],
+    )
     await client.install_uplink()
 
-    if not await client.authenticate(data[CONF_ACCESS_GRANT]):
+    if not await client.authenticate():
         raise InvalidAuth
     elif not await client.satelitte_is_live():
         raise CannotConnect("Satelitte is not reachable")
