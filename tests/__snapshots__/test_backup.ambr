@@ -100,23 +100,6 @@
     'temp/Test_2025-01-01_01.23_45678000.tar',
   )
 # ---
-# name: test_agents_list_backups
-  list([
-    tuple(
-      'uplink',
-      'ls',
-      'sj://ha-backups/backups/',
-      '--o',
-      'json',
-    ),
-    tuple(
-      'uplink',
-      'meta',
-      'get',
-      'sj://ha-backups/backups/backup.tar',
-    ),
-  ])
-# ---
 # name: test_agents_upload
   tuple(
     'uplink',
