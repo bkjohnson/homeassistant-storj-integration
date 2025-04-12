@@ -27,6 +27,7 @@ from syrupy.assertion import SnapshotAssertion
 from syrupy.matchers import path_type
 
 from custom_components.storj import DATA_BACKUP_AGENT_LISTENERS
+from custom_components.storj.api import UplinkError
 from custom_components.storj.backup import async_register_backup_agents_listener
 from custom_components.storj.const import DOMAIN
 
@@ -262,22 +263,22 @@ async def test_agents_list_backups(
 async def test_agents_list_backups_fail(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
+    mock_access: tuple[MagicMock, MagicMock],
 ) -> None:
     """Test agent list backups fails."""
 
-    with mock_asyncio_subprocess_run(
-        responses=iter([b""]), returncode=1
-    ) as subprocess_exec:
-        client = await hass_ws_client(hass)
-        await client.send_json_auto_id({"type": "backup/info"})
-        response = await client.receive_json()
+    _, mock_project = mock_access
+    mock_project.list_objects = MagicMock(side_effect=UplinkError("some error"))
 
-        assert response["success"]
-        assert response["result"]["backups"] == []
-        assert response["result"]["agent_errors"] == {
-            TEST_AGENT_ID: "Failed to list backups: Unable to fetch backup data"
-        }
-        assert subprocess_exec.called
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": "backup/info"})
+    response = await client.receive_json()
+
+    assert response["success"]
+    assert response["result"]["backups"] == []
+    assert response["result"]["agent_errors"] == {
+        TEST_AGENT_ID: "Failed to list backups: some error"
+    }
 
 
 @pytest.mark.parametrize(
