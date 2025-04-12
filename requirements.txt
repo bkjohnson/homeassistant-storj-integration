@@ -13,7 +13,7 @@ types-aiofiles
 # Runtime deps
 json_flatten==0.3.1
 icmplib==3.0.4
-storj-uplink==0.1.6
+storj-uplink==0.2.0
 
 # Testing
 pytest-homeassistant-custom-component>=0.13.233
