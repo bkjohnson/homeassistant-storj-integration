@@ -17,6 +17,7 @@ from homeassistant.components.backup import AgentBackup, suggested_filename
 from homeassistant.exceptions import HomeAssistantError
 from icmplib import async_ping  # type: ignore
 from json_flatten import flatten, unflatten  # type: ignore
+from storj_uplink.module_classes import ListObjectsOptions
 from storj_uplink.uplink import Uplink
 
 from .helpers import ChunkAsyncStreamIterator
@@ -147,39 +148,16 @@ class StorjClient:
                 "Uploaded backup: %s to '%s'", backup.backup_id, self.bucket_name
             )
 
-    async def _get_metadata(self, filename: str) -> dict[str, str]:
-        result = await asyncio.create_subprocess_exec(
-            "uplink",
-            "meta",
-            "get",
-            f"sj://{self.bucket_name}/backups/{filename}",
-            stdout=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await result.communicate()
-
-        return json.loads(stdout.decode())
-
     async def async_list_backups(self) -> list[AgentBackup]:
         """List the backups currently in the bucket."""
 
-        result = await asyncio.create_subprocess_exec(
-            "uplink",
-            "ls",
-            f"sj://{self.bucket_name}/backups/",
-            "--o",
-            "json",
-            stdout=asyncio.subprocess.PIPE,
-        )
-        stdout, stderr = await result.communicate()
-        if result.returncode != 0:
-            raise UplinkError("Unable to fetch backup data")
-
-        storj_objs = [json.loads(ob) for ob in stdout.decode().split("\n") if ob]
+        options = ListObjectsOptions(prefix="backups/", custom=True)
+        storj_objs = self._project.list_objects(self.bucket_name, options)
 
         backups: list[AgentBackup] = []
         for ob in storj_objs:
-            metadata = await self._get_metadata(ob["key"])
-            metadata_dict = unflatten(metadata)
+            flattened_object_metadata = {x.key: x.value for x in ob.custom.entries}
+            metadata_dict = unflatten(flattened_object_metadata)
             if "homeassistant_version" in metadata_dict.keys():
                 backup = AgentBackup.from_dict(metadata_dict)
                 backups.append(backup)
