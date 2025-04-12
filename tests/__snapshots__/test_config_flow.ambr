@@ -9,15 +9,18 @@
       'abc123xyz',
       '--force',
     ),
-    tuple(
-      'uplink',
-      'access',
-      'inspect',
-      'ha2',
-    ),
   ])
 # ---
 # name: test_form.1
+  list([
+    tuple(
+      'abc123xyz',
+    ),
+    tuple(
+    ),
+  ])
+# ---
+# name: test_form.2
   tuple(
     'my.storj-satellite.io',
   )
@@ -31,12 +34,6 @@
       'ha2',
       'abc123xyz',
       '--force',
-    ),
-    tuple(
-      'uplink',
-      'access',
-      'inspect',
-      'ha2',
     ),
   ])
 # ---
@@ -71,12 +68,6 @@
       'abc123xyz',
       '--force',
     ),
-    tuple(
-      'uplink',
-      'access',
-      'inspect',
-      'ha2',
-    ),
   ])
 # ---
 # name: test_form_uplink_needs_installation
@@ -109,12 +100,6 @@
       'ha2',
       'abc123xyz',
       '--force',
-    ),
-    tuple(
-      'uplink',
-      'access',
-      'inspect',
-      'ha2',
     ),
   ])
 # ---
