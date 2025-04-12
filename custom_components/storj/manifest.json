@@ -9,7 +9,11 @@
   "homekit": {},
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/bkjohnson/homeassistant-storj-integration/issues",
-  "requirements": ["json_flatten==0.3.1", "icmplib==3.0.0"],
+  "requirements": [
+    "json_flatten==0.3.1",
+    "icmplib==3.0.0",
+    "storj-uplink==0.2.0"
+  ],
   "ssdp": [],
   "version": "0.4.0-pre.1",
   "zeroconf": []
