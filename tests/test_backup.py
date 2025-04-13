@@ -293,32 +293,36 @@ async def test_agents_get_backup(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
     backup_id: str,
+    mock_access: tuple[MagicMock, MagicMock],
     expected_result: dict[str, Any] | None,
 ) -> None:
     """Test agent get backup."""
 
-    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
-        "utf-8"
-    )
+    _, mock_project = mock_access
 
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            flattened_metadata,
-        ]
-    )
+    # Set up all the metadata entries from the TEST_AGENT_BACKUP
+    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
+    mock_entries = []
+    for key, value in flattened_metadata.items():
+        entry = MagicMock()
+        entry.key = key
+        entry.value = str(value)
+        mock_entries.append(entry)
 
-    with mock_asyncio_subprocess_run(responses=responses) as subprocess_exec:
-        client = await hass_ws_client(hass)
-        await client.send_json_auto_id(
-            {"type": "backup/details", "backup_id": backup_id}
-        )
-        response = await client.receive_json()
+    # Set up the mock object with custom metadata
+    mock_object = MagicMock()
+    mock_object.custom.entries = mock_entries
 
-        assert response["success"]
-        assert response["result"]["agent_errors"] == {}
-        assert response["result"]["backup"] == expected_result
-        assert subprocess_exec.called
+    # Configure the mock_project's list_objects method
+    mock_project.list_objects.return_value = [mock_object]
+
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": "backup/details", "backup_id": backup_id})
+    response = await client.receive_json()
+
+    assert response["success"]
+    assert response["result"]["agent_errors"] == {}
+    assert response["result"]["backup"] == expected_result
 
 
 async def test_agents_delete(
