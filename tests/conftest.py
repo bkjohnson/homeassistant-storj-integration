@@ -51,27 +51,20 @@ def mock_config_entry() -> MockConfigEntry:
 
 
 @pytest.fixture(autouse=True)
-def mock_access() -> Generator[None, None, None]:
+def mock_access() -> Generator[MagicMock]:
     """Mock the Uplink class to prevent parse_access from being called."""
-    # Create mock objects
     mock_access_obj = MagicMock()
-    mock_project = MagicMock()
 
     # Set up behavior for the mocked objects
     mock_access_obj.satellite_address.return_value = (
         "123abcDEFxyz@my.storj-satellite.io:7777"
     )
-    mock_access_obj.open_project.return_value = mock_project
 
-    # Mock the Uplink class itself in both locations
     with (
-        patch("storj_uplink.uplink.Uplink") as mock_uplink_lib,
         patch("custom_components.storj.api.Uplink") as mock_uplink_api,
     ):
-        # Configure both mocks to return a mock with parse_access method
-        mock_uplink_lib.return_value.parse_access.return_value = mock_access_obj
         mock_uplink_api.return_value.parse_access.return_value = mock_access_obj
-        yield
+        yield mock_uplink_api
 
 
 @pytest.fixture
