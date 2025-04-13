@@ -23,6 +23,8 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+print("test")
+
 
 async def async_get_backup_agents(
     hass: HomeAssistant,
