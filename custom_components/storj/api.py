@@ -31,12 +31,15 @@ class StorjClient:
         self,
         ha_instance_id: str,
         bucket_name: str,
+        access_grant: str,
     ) -> None:
         """Initialize."""
         self._ha_instance_id = ha_instance_id
         self.bucket_name = bucket_name
+        self.access_grant = access_grant
         self._uplink = Uplink()
-        self._project = None
+        self._access = self._uplink.parse_access(access_grant)
+        self._project = self._access.open_project()
 
     async def install_uplink(self) -> bool:
         """Intall the uplink binary if it is not already installed"""
@@ -72,13 +75,11 @@ class StorjClient:
 
         return True
 
-    async def authenticate(self, access_grant: str) -> bool:
+    async def authenticate(self) -> bool:
         """Test if we can authenticate with the host."""
-        self._access = self._uplink.parse_access(access_grant)
-        self._project = self._access
 
         result = await asyncio.create_subprocess_exec(
-            "uplink", "access", "import", "ha2", access_grant, "--force"
+            "uplink", "access", "import", "ha2", self.access_grant, "--force"
         )
         await result.communicate()
 

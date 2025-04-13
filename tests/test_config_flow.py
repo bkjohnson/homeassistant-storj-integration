@@ -17,7 +17,6 @@ from .conftest import mock_asyncio_subprocess_run
 async def test_form(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we get the form."""
@@ -44,7 +43,6 @@ async def test_form(
         )
         await hass.async_block_till_done()
         assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
-        assert [mock_call.args for mock_call in mock_access.mock_calls] == snapshot
         assert snapshot() == mocked_ping.mock_calls[0].args
 
     assert result["type"] is FlowResultType.CREATE_ENTRY
@@ -61,7 +59,6 @@ async def test_form(
 async def test_form_uplink_already_installed(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we get the form."""
@@ -96,7 +93,6 @@ async def test_form_uplink_already_installed(
 async def test_form_uplink_needs_installation(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we get the form."""
@@ -132,7 +128,6 @@ async def test_form_uplink_needs_installation(
 async def test_form_invalid_auth(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we handle invalid auth."""
@@ -193,7 +188,6 @@ async def test_form_invalid_auth(
 async def test_form_cannot_connect(
     hass: HomeAssistant,
     mock_setup_entry: AsyncMock,
-    mock_access: MagicMock,
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test we handle cannot connect error."""

@@ -10,7 +10,7 @@ from homeassistant.helpers import instance_id
 from homeassistant.util.hass_dict import HassKey
 
 from .api import StorjClient
-from .const import CONF_BUCKET_NAME, DOMAIN
+from .const import CONF_ACCESS_GRANT, CONF_BUCKET_NAME, DOMAIN
 
 type StorjConfigEntry = ConfigEntry[StorjClient]
 
@@ -24,7 +24,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: StorjConfigEntry) -> boo
 
     # Validation happens in config_flow
     entry.runtime_data = StorjClient(
-        await instance_id.async_get(hass), entry.data[CONF_BUCKET_NAME]
+        await instance_id.async_get(hass),
+        entry.data[CONF_BUCKET_NAME],
+        entry.data[CONF_ACCESS_GRANT],
     )
 
     _async_notify_backup_listeners_soon(hass)
