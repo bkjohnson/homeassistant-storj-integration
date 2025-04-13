@@ -246,7 +246,6 @@ async def test_agents_list_backups(
     # Set up the mock object with custom metadata
     mock_object = MagicMock()
     mock_object.custom.entries = mock_entries
-    mock_object.key = "backups/Test_2025-01-01_01.23_45678000.tar"
 
     # Configure the mock_project's list_objects method
     mock_project.list_objects.return_value = [mock_object]
@@ -328,21 +327,30 @@ async def test_agents_get_backup(
 async def test_agents_delete(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
+    mock_access: tuple[MagicMock, MagicMock],
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent delete backup."""
 
-    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
-        "utf-8"
-    )
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            flattened_metadata,
-            b"",
-        ]
-    )
-    with mock_asyncio_subprocess_run(responses=responses) as subprocess_exec:
+    _, mock_project = mock_access
+
+    # Set up all the metadata entries from the TEST_AGENT_BACKUP
+    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
+    mock_entries = []
+    for key, value in flattened_metadata.items():
+        entry = MagicMock()
+        entry.key = key
+        entry.value = str(value)
+        mock_entries.append(entry)
+
+    # Set up the mock object with custom metadata
+    mock_object = MagicMock()
+    mock_object.custom.entries = mock_entries
+
+    # Configure the mock_project's list_objects method
+    mock_project.list_objects.return_value = [mock_object]
+
+    with mock_asyncio_subprocess_run(responses=iter([b""])) as subprocess_exec:
         client = await hass_ws_client(hass)
         await client.send_json_auto_id(
             {
@@ -361,22 +369,46 @@ async def test_agents_delete(
 async def test_agents_delete_fail(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
+    mock_access: tuple[MagicMock, MagicMock],
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent delete backup fails."""
-    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
-        "utf-8"
-    )
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            flattened_metadata,
-            b"",
-        ]
-    )
+    _, mock_project = mock_access
+
+    # Set up all the metadata entries from the TEST_AGENT_BACKUP
+    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
+    mock_entries = []
+    for key, value in flattened_metadata.items():
+        entry = MagicMock()
+        entry.key = key
+        entry.value = str(value)
+        mock_entries.append(entry)
+
+    # Set up the mock object with custom metadata
+    mock_object = MagicMock()
+    mock_object.custom.entries = mock_entries
+
+    # Configure the mock_project's list_objects method
+    mock_project.list_objects.return_value = [mock_object]
+
+    # Set up all the metadata entries from the TEST_AGENT_BACKUP
+    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
+    mock_entries = []
+    for key, value in flattened_metadata.items():
+        entry = MagicMock()
+        entry.key = key
+        entry.value = str(value)
+        mock_entries.append(entry)
+
+    # Set up the mock object with custom metadata
+    mock_object = MagicMock()
+    mock_object.custom.entries = mock_entries
+
+    # Configure the mock_project's list_objects method
+    mock_project.list_objects.return_value = [mock_object]
 
     with mock_asyncio_subprocess_run(
-        responses=responses, returncode=iter([0, 1])
+        responses=iter([b""]), returncode=1
     ) as subprocess_exec:
         client = await hass_ws_client(hass)
         await client.send_json_auto_id(
@@ -402,17 +434,8 @@ async def test_agents_delete_not_found(
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent delete backup not found."""
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            b"{}",
-            b"",
-        ]
-    )
 
-    with mock_asyncio_subprocess_run(
-        responses=responses, returncode=iter([0, 0])
-    ) as subprocess_exec:
+    with mock_asyncio_subprocess_run(responses=iter([b""])) as subprocess_exec:
         client = await hass_ws_client(hass)
         backup_id = "1234"
 
