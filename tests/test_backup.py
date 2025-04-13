@@ -105,6 +105,23 @@ async def tempfile_mock() -> Generator[Mock]:
         yield file
 
 
+@pytest.fixture
+async def mock_storj_object_list() -> list[MagicMock]:
+    """Mock a list of Storj objects like we would get from storj_uplink"""
+    # Set up all the metadata entries from the TEST_AGENT_BACKUP
+    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
+    mock_entries = [
+        MagicMock(key=key, value=str(value))
+        for key, value in flattened_metadata.items()
+    ]
+
+    # Set up the mock object with custom metadata
+    mock_object = MagicMock()
+    mock_object.custom.entries = mock_entries
+
+    return [mock_object]
+
+
 async def test_listeners_get_cleaned_up(hass: HomeAssistant) -> None:
     """Test listener gets cleaned up."""
     listener = MagicMock()
@@ -229,26 +246,13 @@ async def test_agents_list_backups(
     hass_ws_client: WebSocketGenerator,
     snapshot: SnapshotAssertion,
     mock_access: tuple[MagicMock, MagicMock],
+    mock_storj_object_list: list[MagicMock],
 ) -> None:
     """Test agent list backups."""
 
     _, mock_project = mock_access
 
-    # Set up all the metadata entries from the TEST_AGENT_BACKUP
-    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
-    mock_entries = []
-    for key, value in flattened_metadata.items():
-        entry = MagicMock()
-        entry.key = key
-        entry.value = str(value)
-        mock_entries.append(entry)
-
-    # Set up the mock object with custom metadata
-    mock_object = MagicMock()
-    mock_object.custom.entries = mock_entries
-
-    # Configure the mock_project's list_objects method
-    mock_project.list_objects.return_value = [mock_object]
+    mock_project.list_objects.return_value = mock_storj_object_list
 
     client = await hass_ws_client(hass)
     await client.send_json_auto_id({"type": "backup/info"})
@@ -293,27 +297,14 @@ async def test_agents_get_backup(
     hass_ws_client: WebSocketGenerator,
     backup_id: str,
     mock_access: tuple[MagicMock, MagicMock],
+    mock_storj_object_list: list[MagicMock],
     expected_result: dict[str, Any] | None,
 ) -> None:
     """Test agent get backup."""
 
     _, mock_project = mock_access
 
-    # Set up all the metadata entries from the TEST_AGENT_BACKUP
-    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
-    mock_entries = []
-    for key, value in flattened_metadata.items():
-        entry = MagicMock()
-        entry.key = key
-        entry.value = str(value)
-        mock_entries.append(entry)
-
-    # Set up the mock object with custom metadata
-    mock_object = MagicMock()
-    mock_object.custom.entries = mock_entries
-
-    # Configure the mock_project's list_objects method
-    mock_project.list_objects.return_value = [mock_object]
+    mock_project.list_objects.return_value = mock_storj_object_list
 
     client = await hass_ws_client(hass)
     await client.send_json_auto_id({"type": "backup/details", "backup_id": backup_id})
@@ -328,27 +319,14 @@ async def test_agents_delete(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
     mock_access: tuple[MagicMock, MagicMock],
+    mock_storj_object_list: list[MagicMock],
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent delete backup."""
 
     _, mock_project = mock_access
 
-    # Set up all the metadata entries from the TEST_AGENT_BACKUP
-    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
-    mock_entries = []
-    for key, value in flattened_metadata.items():
-        entry = MagicMock()
-        entry.key = key
-        entry.value = str(value)
-        mock_entries.append(entry)
-
-    # Set up the mock object with custom metadata
-    mock_object = MagicMock()
-    mock_object.custom.entries = mock_entries
-
-    # Configure the mock_project's list_objects method
-    mock_project.list_objects.return_value = [mock_object]
+    mock_project.list_objects.return_value = mock_storj_object_list
 
     with mock_asyncio_subprocess_run(responses=iter([b""])) as subprocess_exec:
         client = await hass_ws_client(hass)
@@ -370,42 +348,13 @@ async def test_agents_delete_fail(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
     mock_access: tuple[MagicMock, MagicMock],
+    mock_storj_object_list: list[MagicMock],
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent delete backup fails."""
     _, mock_project = mock_access
 
-    # Set up all the metadata entries from the TEST_AGENT_BACKUP
-    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
-    mock_entries = []
-    for key, value in flattened_metadata.items():
-        entry = MagicMock()
-        entry.key = key
-        entry.value = str(value)
-        mock_entries.append(entry)
-
-    # Set up the mock object with custom metadata
-    mock_object = MagicMock()
-    mock_object.custom.entries = mock_entries
-
-    # Configure the mock_project's list_objects method
-    mock_project.list_objects.return_value = [mock_object]
-
-    # Set up all the metadata entries from the TEST_AGENT_BACKUP
-    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
-    mock_entries = []
-    for key, value in flattened_metadata.items():
-        entry = MagicMock()
-        entry.key = key
-        entry.value = str(value)
-        mock_entries.append(entry)
-
-    # Set up the mock object with custom metadata
-    mock_object = MagicMock()
-    mock_object.custom.entries = mock_entries
-
-    # Configure the mock_project's list_objects method
-    mock_project.list_objects.return_value = [mock_object]
+    mock_project.list_objects.return_value = mock_storj_object_list
 
     with mock_asyncio_subprocess_run(
         responses=iter([b""]), returncode=1
