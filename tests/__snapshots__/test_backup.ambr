@@ -41,6 +41,25 @@
     'temp/Test_2025-01-01_01.23_45678000.tar',
   )
 # ---
+# name: test_agents_list_backups
+  list([
+    tuple(
+      'list_objects',
+      tuple(
+        'ha-backups',
+        ListObjectsOptions(
+          cursor='',
+          custom=True,
+          prefix='backups/',
+          recursive=False,
+          system=False,
+        ),
+      ),
+      dict({
+      }),
+    ),
+  ])
+# ---
 # name: test_agents_upload
   tuple(
     'uplink',
