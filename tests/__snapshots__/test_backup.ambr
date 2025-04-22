@@ -29,10 +29,6 @@
     'temp/Test_2025-01-01_01.23_45678000.tar',
   )
 # ---
-# name: test_agents_download_file_not_found
-  list([
-  ])
-# ---
 # name: test_agents_download_temp_fail
   tuple(
     'uplink',

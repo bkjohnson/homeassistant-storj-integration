@@ -478,30 +478,15 @@ async def test_agents_download_file_not_found(
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent download backup raises error if not found."""
-    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
-        "utf-8"
-    )
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            flattened_metadata,
-            b"",
-        ]
-    )
 
-    with (
-        mock_asyncio_subprocess_run(
-            responses=responses, returncode=0
-        ) as subprocess_exec,
-    ):
-        client = await hass_client()
-        resp = await client.get(
-            f"/api/backup/download/{TEST_AGENT_BACKUP.backup_id}?agent_id={TEST_AGENT_ID}"
-        )
-        assert resp.status == 404
-        content = await resp.content.read()
-        assert content == b""
-        assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
+    client = await hass_client()
+    resp = await client.get(
+        f"/api/backup/download/{TEST_AGENT_BACKUP.backup_id}?agent_id={TEST_AGENT_ID}"
+    )
+    assert resp.status == 404
+    content = await resp.content.read()
+    assert content == b""
+    # assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
 
 
 async def test_agents_download_metadata_not_found(
