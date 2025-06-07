@@ -4,7 +4,7 @@ aiofiles==24.1.0
 
 # Linting
 pre-commit==4.2.0
-mypy==1.15.0
+mypy==1.16.0
 ruff==0.11.13
 
 # mypy stubs
