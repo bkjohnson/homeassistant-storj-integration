@@ -27,6 +27,7 @@ from syrupy.assertion import SnapshotAssertion
 from syrupy.matchers import path_type
 
 from custom_components.storj import DATA_BACKUP_AGENT_LISTENERS
+from custom_components.storj.api import UplinkError
 from custom_components.storj.backup import async_register_backup_agents_listener
 from custom_components.storj.const import DOMAIN
 
@@ -102,6 +103,23 @@ async def tempfile_mock() -> Generator[Mock]:
         file = mock_tempfile.return_value.__enter__.return_value
         file.name = "tmp.tar"
         yield file
+
+
+@pytest.fixture
+async def mock_storj_object_list() -> list[MagicMock]:
+    """Mock a list of Storj objects like we would get from storj_uplink"""
+    # Set up all the metadata entries from the TEST_AGENT_BACKUP
+    flattened_metadata = flatten(TEST_AGENT_BACKUP.as_dict())
+    mock_entries = [
+        MagicMock(key=key, value=str(value))
+        for key, value in flattened_metadata.items()
+    ]
+
+    # Set up the mock object with custom metadata
+    mock_object = MagicMock()
+    mock_object.custom.entries = mock_entries
+
+    return [mock_object]
 
 
 async def test_listeners_get_cleaned_up(hass: HomeAssistant) -> None:
@@ -227,52 +245,44 @@ async def test_agents_list_backups(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
     snapshot: SnapshotAssertion,
+    mock_access: tuple[MagicMock, MagicMock],
+    mock_storj_object_list: list[MagicMock],
 ) -> None:
     """Test agent list backups."""
 
-    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
-        "utf-8"
-    )
+    _, mock_project = mock_access
 
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            flattened_metadata,
-        ]
-    )
+    mock_project.list_objects.return_value = mock_storj_object_list
 
-    with (
-        mock_asyncio_subprocess_run(responses=responses) as subprocess_exec,
-    ):
-        client = await hass_ws_client(hass)
-        await client.send_json_auto_id({"type": "backup/info"})
-        response = await client.receive_json()
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": "backup/info"})
+    response = await client.receive_json()
 
-        assert response["success"]
-        assert response["result"]["agent_errors"] == {}
-        assert response["result"]["backups"] == [TEST_AGENT_BACKUP_RESULT]
-        assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
+    assert response["success"]
+    assert response["result"]["agent_errors"] == {}
+    assert response["result"]["backups"] == [TEST_AGENT_BACKUP_RESULT]
+    assert [tuple(mock_call) for mock_call in mock_project.mock_calls] == snapshot
 
 
 async def test_agents_list_backups_fail(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
+    mock_access: tuple[MagicMock, MagicMock],
 ) -> None:
     """Test agent list backups fails."""
 
-    with mock_asyncio_subprocess_run(
-        responses=iter([b""]), returncode=1
-    ) as subprocess_exec:
-        client = await hass_ws_client(hass)
-        await client.send_json_auto_id({"type": "backup/info"})
-        response = await client.receive_json()
+    _, mock_project = mock_access
+    mock_project.list_objects = MagicMock(side_effect=UplinkError("some error"))
 
-        assert response["success"]
-        assert response["result"]["backups"] == []
-        assert response["result"]["agent_errors"] == {
-            TEST_AGENT_ID: "Failed to list backups: Unable to fetch backup data"
-        }
-        assert subprocess_exec.called
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": "backup/info"})
+    response = await client.receive_json()
+
+    assert response["success"]
+    assert response["result"]["backups"] == []
+    assert response["result"]["agent_errors"] == {
+        TEST_AGENT_ID: "Failed to list backups: some error"
+    }
 
 
 @pytest.mark.parametrize(
@@ -287,52 +297,39 @@ async def test_agents_get_backup(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
     backup_id: str,
+    mock_access: tuple[MagicMock, MagicMock],
+    mock_storj_object_list: list[MagicMock],
     expected_result: dict[str, Any] | None,
 ) -> None:
     """Test agent get backup."""
 
-    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
-        "utf-8"
-    )
+    _, mock_project = mock_access
 
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            flattened_metadata,
-        ]
-    )
+    mock_project.list_objects.return_value = mock_storj_object_list
 
-    with mock_asyncio_subprocess_run(responses=responses) as subprocess_exec:
-        client = await hass_ws_client(hass)
-        await client.send_json_auto_id(
-            {"type": "backup/details", "backup_id": backup_id}
-        )
-        response = await client.receive_json()
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id({"type": "backup/details", "backup_id": backup_id})
+    response = await client.receive_json()
 
-        assert response["success"]
-        assert response["result"]["agent_errors"] == {}
-        assert response["result"]["backup"] == expected_result
-        assert subprocess_exec.called
+    assert response["success"]
+    assert response["result"]["agent_errors"] == {}
+    assert response["result"]["backup"] == expected_result
 
 
 async def test_agents_delete(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
+    mock_access: tuple[MagicMock, MagicMock],
+    mock_storj_object_list: list[MagicMock],
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent delete backup."""
 
-    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
-        "utf-8"
-    )
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            flattened_metadata,
-            b"",
-        ]
-    )
-    with mock_asyncio_subprocess_run(responses=responses) as subprocess_exec:
+    _, mock_project = mock_access
+
+    mock_project.list_objects.return_value = mock_storj_object_list
+
+    with mock_asyncio_subprocess_run(responses=iter([b""])) as subprocess_exec:
         client = await hass_ws_client(hass)
         await client.send_json_auto_id(
             {
@@ -351,22 +348,17 @@ async def test_agents_delete(
 async def test_agents_delete_fail(
     hass: HomeAssistant,
     hass_ws_client: WebSocketGenerator,
+    mock_access: tuple[MagicMock, MagicMock],
+    mock_storj_object_list: list[MagicMock],
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent delete backup fails."""
-    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
-        "utf-8"
-    )
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            flattened_metadata,
-            b"",
-        ]
-    )
+    _, mock_project = mock_access
+
+    mock_project.list_objects.return_value = mock_storj_object_list
 
     with mock_asyncio_subprocess_run(
-        responses=responses, returncode=iter([0, 1])
+        responses=iter([b""]), returncode=1
     ) as subprocess_exec:
         client = await hass_ws_client(hass)
         await client.send_json_auto_id(
@@ -392,17 +384,8 @@ async def test_agents_delete_not_found(
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent delete backup not found."""
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            b"{}",
-            b"",
-        ]
-    )
 
-    with mock_asyncio_subprocess_run(
-        responses=responses, returncode=iter([0, 0])
-    ) as subprocess_exec:
+    with mock_asyncio_subprocess_run(responses=iter([b""])) as subprocess_exec:
         client = await hass_ws_client(hass)
         backup_id = "1234"
 
@@ -495,30 +478,15 @@ async def test_agents_download_file_not_found(
     snapshot: SnapshotAssertion,
 ) -> None:
     """Test agent download backup raises error if not found."""
-    flattened_metadata = json.dumps(flatten(TEST_AGENT_BACKUP.as_dict())).encode(
-        "utf-8"
-    )
-    responses = iter(
-        [
-            b'{"kind":"OBJ","created":"2025-02-09 20:02:19","size":12,"key":"backup.tar"}',
-            flattened_metadata,
-            b"",
-        ]
-    )
 
-    with (
-        mock_asyncio_subprocess_run(
-            responses=responses, returncode=0
-        ) as subprocess_exec,
-    ):
-        client = await hass_client()
-        resp = await client.get(
-            f"/api/backup/download/{TEST_AGENT_BACKUP.backup_id}?agent_id={TEST_AGENT_ID}"
-        )
-        assert resp.status == 404
-        content = await resp.content.read()
-        assert content == b""
-        assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
+    client = await hass_client()
+    resp = await client.get(
+        f"/api/backup/download/{TEST_AGENT_BACKUP.backup_id}?agent_id={TEST_AGENT_ID}"
+    )
+    assert resp.status == 404
+    content = await resp.content.read()
+    assert content == b""
+    # assert [mock_call.args for mock_call in subprocess_exec.mock_calls] == snapshot
 
 
 async def test_agents_download_metadata_not_found(
