@@ -1,6 +1,6 @@
 pip==25.0.1
 homeassistant>=2025.4.1
-aiofiles==24.1.0
+aiofiles==25.1.0
 
 # Linting
 pre-commit==4.2.0
